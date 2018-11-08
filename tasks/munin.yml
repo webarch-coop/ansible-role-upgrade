@@ -7,15 +7,17 @@
 
 - name: Check the Munin apt_all plugin output
   command: munin-run apt_all
-  register: munin_apt_all
-  when: munin_apt_all.changed
+  args:
+    chdir: /etc/munin/plugins
   environment:
     PATH: /bin:/sbin:/usr/bin:/usr/sbin
+  register: munin_run_apt_all
+  when: apt_state.changed
 
 - debug:
-    msg: "Standard out from `munin-run apt_all` : {{ munin_apt_all.stdout }}"
+    msg: "Standard out from `munin-run apt_all` : {{ munin_run_apt_all.stdout }}"
     verbosity: 1
 
 - debug:
-    msg: "Standard error from `munin-run apt_all` : {{ munin_apt_all.stderr }}"
+    msg: "Standard error from `munin-run apt_all` : {{ munin_run_apt_all.stderr }}"
     verbosity: 1

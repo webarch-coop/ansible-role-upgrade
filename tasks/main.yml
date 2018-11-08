@@ -3,6 +3,7 @@
   apt:
     update_cache: yes
     cache_valid_time: 0
+  register: apt_cache
 
 # Unlike `apt-show-versions -b -u` the following will also list new packages
 - name: Check for updates and new packages using apt-get dist-upgrade -q -s
@@ -31,17 +32,24 @@
     register: dist_upgrade
     environment:
       PATH: /bin:/sbin:/usr/bin:/usr/sbin
-
+  
   - debug:
       msg: "Standard out from `aptitude dist-upgrade` : {{ dist_upgrade.stdout }}"
       verbosity: 1
-
+  
   - debug:
       msg: "Standard error from `aptitude dist-upgrade` : {{ dist_upgrade.stderr }}"
       verbosity: 1
 
+  # The logchange script is in the https://git.coop/webarch/ansible repo
+  - name: Check the existance of /usr/local/bin/logchange
+    stat:
+      path: /usr/local/bin/logchange
+    register: logchange
+
   - name: Update the Changelog
     command: "logchange '{{ packages.stdout }} : updated'"
+    when: logchange.stat.exists
 
   when: packages.stdout != ""
 
@@ -57,10 +65,10 @@
 - name: Check the existance of /etc/munin/plugins/apt_all
   stat:
     path: /etc/munin/plugins/apt_all
-  register: munin_apt_all
+  register: munin_plugin_apt_all
 
 - name: Conditionally include munin tasks
   include_tasks: munin.yml
-  when: munin_apt_all.stat.exists
+  when: munin_plugin_apt_all.stat.exists
 
 # TODO add checks for wp-cli, docker-compose and other tools not updating using system packages
