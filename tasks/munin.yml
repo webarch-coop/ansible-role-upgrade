@@ -4,6 +4,9 @@
     path: /var/lib/munin-node/plugin-state/nobody/plugin-apt.state
     state: absent
   register: apt_state
+  tags:
+    - upgrade
+    - munin
 
 - name: Check the Munin apt_all plugin output
   command: munin-run apt_all
@@ -13,11 +16,20 @@
     PATH: /bin:/sbin:/usr/bin:/usr/sbin
   register: munin_run_apt_all
   when: apt_state.changed
+  tags:
+    - upgrade
+    - munin
 
 - debug:
     msg: "Standard out from `munin-run apt_all` : {{ munin_run_apt_all.stdout }}"
     verbosity: 1
+  tags:
+    - upgrade
+    - munin
 
 - debug:
     msg: "Standard error from `munin-run apt_all` : {{ munin_run_apt_all.stderr }}"
     verbosity: 1
+  tags:
+    - upgrade
+    - munin

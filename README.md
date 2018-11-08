@@ -41,14 +41,15 @@ all:
   children:
     stretch_servers:
       hosts:
-        host1.example.org:
-        host2.example.org:
+        host3.example.org:
+        host4.example.org:
         cloud.example.com:
         cloud.example.org:
         cloud.example.net:
     jessie_servers:
       hosts:
-        host3.example.org:
+        host1.example.org:
+        host2.example.org:
 ```
 
 Then it can be run as follows:
