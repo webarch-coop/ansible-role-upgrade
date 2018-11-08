@@ -1,0 +1,24 @@
+---
+- name: Delete the apt state file
+  file:
+    path: /var/lib/munin-node/plugin-state/nobody/plugin-apt.state
+    state: absent
+  register: apt_state
+  when: apt_all.stat.exists
+
+- name: Check the Munin apt_all plugin output
+  command: munin-run apt_all
+  register: munin_apt_all
+  when: apt_all.stat.exists and apt_state.changed
+  environment:
+    PATH: /bin:/sbin:/usr/bin:/usr/sbin
+
+- debug:
+    msg: "Standard out from `munin-run apt_all` : {{ munin_apt_all.stdout }}"
+    verbosity: 1
+  when: apt_all.stat.exists 
+
+- debug:
+    msg: "Standard error from `munin-run apt_all` : {{ munin_apt_all.stderr }}"
+    verbosity: 1
+  when: apt_all.stat.exists 

@@ -1,0 +1,6 @@
+---
+- name: Update package lists in the chroot
+  command: chroot /chroot apt-get update
+
+- name: Dist-upgrade in the chroot
+  command: chroot /chroot apt-get dist-upgrade -y 
