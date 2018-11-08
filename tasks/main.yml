@@ -7,6 +7,9 @@
 # Unlike `apt-show-versions -b -u` the following will also list new packages
 - name: Check for updates and new packages using apt-get dist-upgrade -q -s
   shell: apt-get dist-upgrade -q -s | grep '^The following' -A1 | grep '^ ' | xargs
+  args:
+    warn: False
+    executable: /bin/bash
   register: packages
 
 - debug:
