@@ -23,6 +23,10 @@
 
 - block:
 
+  - name: Print the list of packages to be upgraded
+    debug:
+      msg: "The following packages are to be upgraded: {{ packages.stdout }}"
+
   - name: Dist upgrade
     apt:
       update_cache: no
