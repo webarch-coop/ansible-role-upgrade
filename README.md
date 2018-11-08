@@ -1,6 +1,6 @@
 # Ansible Debian Upgrade Role 
 
-This repository contains an Ansible role for iupdating Webarchitects Debian servers.
+This repository contains an Ansible role for updating Webarchitects Debian servers.
 
 To use this role you need to use Ansible Galaxy to install it into another repository by adding a `requirements.yml` file in that repo that contains:
 
