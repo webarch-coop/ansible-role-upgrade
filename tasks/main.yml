@@ -9,7 +9,7 @@
 
 # Unlike `apt-show-versions -b -u` the following will also list new packages
 - name: Check for updates and new packages using apt-get dist-upgrade -q -s
-  shell: apt-get -qq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
+  shell: apt-get -q dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
   args:
     warn: False
     executable: /bin/bash
@@ -18,13 +18,13 @@
     - upgrade
 
 - debug:
-    msg: "Standard out from `apt-get -qq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs` : {{ packages.stdout }}"
+    msg: "Standard out from `apt-get -q dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs` : {{ packages.stdout }}"
     verbosity: 1
   tags:
     - upgrade
 
 - debug:
-    msg: "Standard error from `apt-get -qq dist-upgrade -q | grep '^The following' -A1 | grep '^ ' | xargs` : {{ packages.stderr }}"
+    msg: "Standard error from `apt-get -q dist-upgrade -q | grep '^The following' -A1 | grep '^ ' | xargs` : {{ packages.stderr }}"
     verbosity: 1
   tags:
     - upgrade
