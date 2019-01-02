@@ -107,4 +107,19 @@
     - upgrade
     - munin
 
+- name: Check the existance of /etc/apt/sources.list.d/yarn.list
+  stat:
+    path: /etc/apt/sources.list.d/yarn.list
+  register: upgrade_yarn_repo
+  tags:
+    - upgrade
+    - yarn
+
+- name: Conditionally include yarn role
+  include_role:
+    name: yarn
+  tags:
+    - upgrade
+    - yarn
+
 # TODO add checks for wp-cli, docker-compose and other tools not updating using system packages
