@@ -1,111 +1,5 @@
 ---
-- name: Update apt cache
-  apt:
-    update_cache: yes
-    cache_valid_time: 0
-  register: apt_cache
-  tags:
-    - upgrade
-
-# Unlike `apt-show-versions -b -u` the following will also list new packages
-- name: Check for updates and new packages using apt-get dist-upgrade -q -s
-  shell: apt-get -q dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
-  args:
-    warn: False
-    executable: /bin/bash
-  register: packages
-  tags:
-    - upgrade
-
-- debug:
-    msg: "Standard out from `apt-get -q dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs` : {{ packages.stdout }}"
-    verbosity: 1
-  tags:
-    - upgrade
-
-- debug:
-    msg: "Standard error from `apt-get -q dist-upgrade -q | grep '^The following' -A1 | grep '^ ' | xargs` : {{ packages.stderr }}"
-    verbosity: 1
-  tags:
-    - upgrade
-
-- block:
-
-  - name: Print the list of packages to be upgraded
-    debug:
-      msg: "The following packages are to be upgraded: {{ packages.stdout }}"
-    tags:
-      - upgrade
-
-  - name: Dist upgrade
-    apt:
-      update_cache: no
-      upgrade: dist
-      autoclean: yes
-      autoremove: yes
-    register: dist_upgrade
-    environment:
-      PATH: /bin:/sbin:/usr/bin:/usr/sbin
-    tags:
-      - upgrade
-  
-  - debug:
-      msg: "Standard out from `aptitude dist-upgrade` : {{ dist_upgrade.stdout }}"
-      verbosity: 1
-    tags:
-      - upgrade
-  
-  - debug:
-      msg: "Standard error from `aptitude dist-upgrade` : {{ dist_upgrade.stderr }}"
-      verbosity: 1
-    tags:
-      - upgrade
-
-  # The logchange script is in the https://git.coop/webarch/ansible repo
-  - name: Check the existance of /usr/local/bin/logchange
-    stat:
-      path: /usr/local/bin/logchange
-    register: logchange
-    tags:
-      - upgrade
-
-  - name: Update the Changelog
-    command: "logchange '{{ packages.stdout }} : updated'"
-    when: logchange.stat.exists
-  tags:
-    - upgrade
-
-  when: packages.stdout != ""
-
-- name: Check the existance of /chroot
-  stat:
-    path: /chroot
-  register: chroot
-  tags:
-    - upgrade
-    - chroot
-
-- name: Conditionally include chroot tasks
-  include_tasks: chroot.yml
-  when: chroot.stat.exists
-  tags:
-    - upgrade
-    - chroot
-
-- name: Check the existance of /etc/munin/plugins/apt_all
-  stat:
-    path: /etc/munin/plugins/apt_all
-  register: munin_plugin_apt_all
-  tags:
-    - upgrade
-    - munin
-
-- name: Conditionally include munin tasks
-  include_tasks: munin.yml
-  when: munin_plugin_apt_all.stat.exists
-  tags:
-    - upgrade
-    - munin
+# TODO add checks for wp-cli, docker-compose and other tools not updating using system packages
 
 - name: Check the existance of /etc/apt/sources.list.d/yarn.list
   stat:
@@ -123,4 +17,109 @@
     - upgrade
     - yarn
 
-# TODO add checks for wp-cli, docker-compose and other tools not updating using system packages
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 0
+  tags:
+    - upgrade
+
+# Unlike `apt-show-versions -b -u` the following will also list new packages
+- name: Check for updates and new packages using apt-get dist-upgrade -q -s
+  shell: apt-get -q dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
+  args:
+    warn: False
+    executable: /bin/bash
+  register: upgrade_packages
+  tags:
+    - upgrade
+
+- debug:
+    msg: "Standard out from `apt-get -q dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs` : {{ upgrade_packages.stdout }}"
+    verbosity: 1
+  tags:
+    - upgrade
+
+- debug:
+    msg: "Standard error from `apt-get -q dist-upgrade -q | grep '^The following' -A1 | grep '^ ' | xargs` : {{ upgrade_packages.stderr }}"
+    verbosity: 1
+  tags:
+    - upgrade
+
+- block:
+
+  - name: Print the list of packages to be upgraded
+    debug:
+      msg: "The following packages are to be upgraded: {{ upgrade_packages.stdout }}"
+    tags:
+      - upgrade
+
+  - name: Dist upgrade
+    apt:
+      update_cache: no
+      upgrade: dist
+      autoclean: yes
+      autoremove: yes
+    register: upgrade_dist_upgrade
+    environment:
+      PATH: /bin:/sbin:/usr/bin:/usr/sbin
+    tags:
+      - upgrade
+  
+  - debug:
+      msg: "Standard out from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stdout }}"
+      verbosity: 1
+    tags:
+      - upgrade
+  
+  - debug:
+      msg: "Standard error from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stderr }}"
+      verbosity: 1
+    tags:
+      - upgrade
+
+  # The logchange script is in the https://git.coop/webarch/ansible repo
+  - name: Check the existance of /usr/local/bin/logchange
+    stat:
+      path: /usr/local/bin/logchange
+    register: upgrade_logchange
+    tags:
+      - upgrade
+
+  - name: Update the Changelog
+    command: "logchange '{{ upgrade_packages.stdout }} : updated'"
+    when: upgrade_logchange.stat.exists
+  tags:
+    - upgrade
+
+  when: upgrade_packages.stdout != ""
+
+- name: Check the existance of /chroot
+  stat:
+    path: /chroot
+  register: upgrade_chroot
+  tags:
+    - upgrade
+    - chroot
+
+- name: Conditionally include chroot tasks
+  include_tasks: chroot.yml
+  when: upgrade_chroot.stat.exists
+  tags:
+    - upgrade
+    - chroot
+
+- name: Check the existance of /etc/munin/plugins/apt_all
+  stat:
+    path: /etc/munin/plugins/apt_all
+  register: upgrade_munin_plugin_apt_all
+  tags:
+    - upgrade
+    - munin
+
+- name: Conditionally include munin tasks
+  include_tasks: munin.yml
+  when: upgrade_munin_plugin_apt_all.stat.exists
+  tags:
+    - upgrade
+    - munin

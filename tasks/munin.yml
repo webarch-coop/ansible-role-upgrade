@@ -3,7 +3,7 @@
   file:
     path: /var/lib/munin-node/plugin-state/nobody/plugin-apt.state
     state: absent
-  register: apt_state
+  register: upgrade_apt_state
   tags:
     - upgrade
     - munin
@@ -14,21 +14,21 @@
     chdir: /etc/munin/plugins
   environment:
     PATH: /bin:/sbin:/usr/bin:/usr/sbin
-  register: munin_run_apt_all
-  when: apt_state.changed
+  register: upgrade_munin_run_apt_all
+  when: upgrade_apt_state.changed
   tags:
     - upgrade
     - munin
 
 - debug:
-    msg: "Standard out from `munin-run apt_all` : {{ munin_run_apt_all.stdout }}"
+    msg: "Standard out from `munin-run apt_all` : {{ upgrade_munin_run_apt_all.stdout }}"
     verbosity: 1
   tags:
     - upgrade
     - munin
 
 - debug:
-    msg: "Standard error from `munin-run apt_all` : {{ munin_run_apt_all.stderr }}"
+    msg: "Standard error from `munin-run apt_all` : {{ upgrade_munin_run_apt_all.stderr }}"
     verbosity: 1
   tags:
     - upgrade
