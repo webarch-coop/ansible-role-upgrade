@@ -1,5 +1,0 @@
----
-- name: yarn
-  src: https://git.coop/webarch/yarn.git
-  version: master
-  scm: git
