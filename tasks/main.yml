@@ -118,6 +118,7 @@
 - name: Conditionally include yarn role
   include_role:
     name: yarn
+  when: upgrade_yarn_repo.stat.exists
   tags:
     - upgrade
     - yarn
