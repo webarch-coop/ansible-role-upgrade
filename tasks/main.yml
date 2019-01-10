@@ -94,14 +94,14 @@
     tags:
       - upgrade
 
-  - name: Aptitude autoclean
-    command: aptitude autoclean
-    register: upgrade_aptitude_autoclean
+  - name: Aptitude clean
+    command: aptitude clean
+    register: upgrade_aptitude_clean
     tags:
       - upgrade
 
   - debug:
-      msg: "Standard out from `aptitude autoclean` : {{ upgrade_aptitude_autoclean }}"
+      msg: "Standard out from `aptitude clean` : {{ upgrade_aptitude_clean }}"
       verbosity: 1
     tags:
       - upgrade
