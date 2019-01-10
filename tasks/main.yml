@@ -20,10 +20,11 @@
       - apticron
       - aptitude
       - python-apt 
+      - python3-apt
     state: latest
     update_cache: yes
     cache_valid_time: 0
-    register: upgrade_apt
+  register: upgrade_apt
   tags:
     - upgrade
 
