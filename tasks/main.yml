@@ -1,10 +1,35 @@
 ---
 # TODO add checks for wp-cli, docker-compose and other tools not updating using system packages
 
-- name: Update apt cache
+# The logchange script is in the https://git.coop/webarch/ansible repo
+- name: Check the existance of /usr/local/bin/logchange
+  stat:
+    path: /usr/local/bin/logchange
+  register: upgrade_logchange
+  tags:
+    - upgrade
+
+- name: Apt packages present
   apt:
+    pkg:
+      - apt
+      - apt-listchanges
+      - apt-show-versions
+      - apt-transport-https
+      - apt-utils
+      - apticron
+      - aptitude
+      - python-apt 
+    state: latest
     update_cache: yes
     cache_valid_time: 0
+    register: upgrade_apt
+  tags:
+    - upgrade
+
+- name: Update the Changelog if apt packages have been installed or updated
+  command: "logchange '{{ upgrade_apt.stdout }} : updated'"
+  when: upgrade_logchange.stat.exists and upgrade_apt.changed
   tags:
     - upgrade
 
@@ -62,19 +87,23 @@
     tags:
       - upgrade
 
-  # The logchange script is in the https://git.coop/webarch/ansible repo
-  - name: Check the existance of /usr/local/bin/logchange
-    stat:
-      path: /usr/local/bin/logchange
-    register: upgrade_logchange
-    tags:
-      - upgrade
-
   - name: Update the Changelog
     command: "logchange '{{ upgrade_packages.stdout }} : updated'"
     when: upgrade_logchange.stat.exists
-  tags:
-    - upgrade
+    tags:
+      - upgrade
+
+  - name: Aptitude autoclean
+    command: aptitude autoclean
+    register: upgrade_aptitude_autoclean
+    tags:
+      - upgrade
+
+  - debug:
+      msg: "Standard out from `aptitude autoclean` : {{ upgrade_aptitude_autoclean }}"
+      verbosity: 1
+    tags:
+      - upgrade
 
   when: upgrade_packages.stdout != ""
 
