@@ -1,7 +1,7 @@
 ---
 # TODO add checks for wp-cli, docker-compose and other tools not updating using system packages
 
-# The logchange script is in the https://git.coop/webarch/ansible repo
+# The logchange script is in the https://git.coop/webarch/scripts repo
 - name: Check the existance of /usr/local/bin/logchange
   stat:
     path: /usr/local/bin/logchange
@@ -144,3 +144,4 @@
   tags:
     - upgrade
     - munin
+...
