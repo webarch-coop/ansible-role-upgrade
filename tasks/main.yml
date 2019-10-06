@@ -12,7 +12,7 @@
 # If this fails run `apt-get update --allow-releaseinfo-change`
 - name: Update the apt cache
   apt:
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 0
   tags:
     - upgrade
@@ -30,7 +30,7 @@
       - python-apt 
       - python3-apt
     state: latest
-    update_cache: no
+    update_cache: false
   register: upgrade_apt
   tags:
     - upgrade
@@ -73,10 +73,10 @@
 
   - name: Dist upgrade
     apt:
-      update_cache: no
+      update_cache: false
       upgrade: dist
-      autoclean: yes
-      autoremove: yes
+      autoclean: true
+      autoremove: true
     register: upgrade_dist_upgrade
     environment:
       PATH: /bin:/sbin:/usr/bin:/usr/sbin
