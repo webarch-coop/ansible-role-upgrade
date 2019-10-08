@@ -1,7 +1,7 @@
 ---
 - name: "Check that apt-get exists in {{ chroot_dir | default('/chroot') }}"
   stat:
-    path: /usr/bin/apt-get
+    path: "{{ chroot_dir | default('/chroot') }}/usr/bin/apt-get"
   register: upgrade_chroot_apt
   tags:
     - upgrade
