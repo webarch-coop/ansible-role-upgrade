@@ -52,7 +52,7 @@
         - upgrade
         - chroot
 
-    - name: Remove set UID from files
+    - name: Remove set GID from files
       shell: "for i in $( find {{ chroot_dir | default('/chroot') }} -perm -2000 ); do chmod g-s $i; done"
       tags:
         - upgrade

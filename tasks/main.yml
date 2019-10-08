@@ -1,7 +1,7 @@
 ---
 # TODO add checks for wp-cli, docker-compose and other tools not updating using system packages
 
-# The logchange script is in the https://git.coop/webarch/ansible repo
+# The logchange script is in the https://git.coop/webarch/scripts repo
 - name: Check the existance of /usr/local/bin/logchange
   stat:
     path: /usr/local/bin/logchange
@@ -12,7 +12,7 @@
 # If this fails run `apt-get update --allow-releaseinfo-change`
 - name: Update the apt cache
   apt:
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 0
   tags:
     - upgrade
@@ -27,10 +27,10 @@
       - apt-utils
       - apticron
       - aptitude
-      - python-apt 
+      - python-apt
       - python3-apt
     state: latest
-    update_cache: no
+    update_cache: false
   register: upgrade_apt
   tags:
     - upgrade
@@ -45,7 +45,7 @@
 - name: Check for updates and new packages using apt-get dist-upgrade -q -s
   shell: apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
   args:
-    warn: False
+    warn: false
     executable: /bin/bash
   environment:
     DEBIAN_FRONTEND: noninteractive
@@ -75,10 +75,10 @@
 
     - name: Dist upgrade
       apt:
-        update_cache: no
         upgrade: dist
-        autoclean: yes
-        autoremove: yes
+        update_cache: false
+        autoclean: true
+        autoremove: true
         dpkg_options: force-confold
       register: upgrade_dist_upgrade
       environment:
