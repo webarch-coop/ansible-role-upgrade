@@ -54,7 +54,7 @@
   tags:
     - upgrade
 
-- name: Debugging
+- name: When upgrade_packages is defined and not empty
   block:
 
     - debug:
@@ -70,10 +70,6 @@
       when: upgrade_packages.stderr is defined
       tags:
         - upgrade
-
-  when: upgrade_packages is defined
-
-- block:
 
     - name: Print the list of packages to be upgraded
       debug:
@@ -93,18 +89,25 @@
         PATH: /bin:/sbin:/usr/bin:/usr/sbin
       tags:
         - upgrade
-    
-    - debug:
-        msg: "Standard out from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stdout }}"
-        verbosity: 1
-      tags:
-        - upgrade
-    
-    - debug:
-        msg: "Standard error from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stderr }}"
-        verbosity: 1
-      tags:
-        - upgrade
+
+    - name: Debugging
+      block:
+
+        - debug:
+            msg: "Standard out from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stdout }}"
+            verbosity: 1
+          when: upgrade_dist_upgrade.stdout != ""
+          tags:
+            - upgrade
+
+        - debug:
+            msg: "Standard error from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stderr }}"
+            verbosity: 1
+          when: upgrade_dist_upgrade.stderr != ""
+          tags:
+            - upgrade
+
+      when: upgrade_dist_upgrade is defined
 
     - name: Update the Changelog
       command: "logchange '{{ upgrade_packages.stdout }} : updated'"
@@ -121,10 +124,11 @@
     - debug:
         msg: "Standard out from `aptitude clean` : {{ upgrade_aptitude_clean }}"
         verbosity: 1
+      when: ( upgrade_aptitude_clean is defined ) and ( upgrade_aptitude_clean != "" )
       tags:
         - upgrade
 
-  when: upgrade_packages.stdout != ""
+  when: ( upgrade_packages is defined ) and ( upgrade_packages.stdout != "" )
 
 - name: Check the existance of /chroot
   stat:
