@@ -15,7 +15,7 @@ To use this role you need to use Ansible Galaxy to install it into another repos
 To pull this repo in run:
 
 ```bash
-ansible-galaxy install -r requirements.yml --force -p roles 
+ansible-galaxy install -r requirements.yml --force
 ```
 
 The other repo should also contain a `upgrade.yml` file that contains:
