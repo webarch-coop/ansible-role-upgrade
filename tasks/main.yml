@@ -43,75 +43,78 @@
 
 # Unlike `apt-show-versions -b -u` the following will also list new packages
 - name: Check for updates and new packages using apt-get dist-upgrade -q -s
-  shell: apt-get -q dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
+  shell: apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
   args:
     warn: False
     executable: /bin/bash
+  environment:
+    DEBIAN_FRONTEND: noninteractive
   register: upgrade_packages
   tags:
     - upgrade
 
 - debug:
-    msg: "Standard out from `apt-get -q dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs` : {{ upgrade_packages.stdout }}"
+    msg: "Standard out from `apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs` : {{ upgrade_packages.stdout }}"
     verbosity: 1
   tags:
     - upgrade
 
 - debug:
-    msg: "Standard error from `apt-get -q dist-upgrade -q | grep '^The following' -A1 | grep '^ ' | xargs` : {{ upgrade_packages.stderr }}"
+    msg: "Standard error from `apt-get -fq dist-upgrade -q | grep '^The following' -A1 | grep '^ ' | xargs` : {{ upgrade_packages.stderr }}"
     verbosity: 1
   tags:
     - upgrade
 
 - block:
 
-  - name: Print the list of packages to be upgraded
-    debug:
-      msg: "The following packages are to be upgraded: {{ upgrade_packages.stdout }}"
-    tags:
-      - upgrade
+    - name: Print the list of packages to be upgraded
+      debug:
+        msg: "The following packages are to be upgraded: {{ upgrade_packages.stdout }}"
+      tags:
+        - upgrade
 
-  - name: Dist upgrade
-    apt:
-      update_cache: no
-      upgrade: dist
-      autoclean: yes
-      autoremove: yes
-    register: upgrade_dist_upgrade
-    environment:
-      PATH: /bin:/sbin:/usr/bin:/usr/sbin
-    tags:
-      - upgrade
-  
-  - debug:
-      msg: "Standard out from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stdout }}"
-      verbosity: 1
-    tags:
-      - upgrade
-  
-  - debug:
-      msg: "Standard error from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stderr }}"
-      verbosity: 1
-    tags:
-      - upgrade
+    - name: Dist upgrade
+      apt:
+        update_cache: no
+        upgrade: dist
+        autoclean: yes
+        autoremove: yes
+        dpkg_options: force-confold
+      register: upgrade_dist_upgrade
+      environment:
+        PATH: /bin:/sbin:/usr/bin:/usr/sbin
+      tags:
+        - upgrade
+    
+    - debug:
+        msg: "Standard out from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stdout }}"
+        verbosity: 1
+      tags:
+        - upgrade
+    
+    - debug:
+        msg: "Standard error from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stderr }}"
+        verbosity: 1
+      tags:
+        - upgrade
 
-  - name: Update the Changelog
-    command: "logchange '{{ upgrade_packages.stdout }} : updated'"
-    when: upgrade_logchange.stat.exists
-    tags:
-      - upgrade
+    - name: Update the Changelog
+      command: "logchange '{{ upgrade_packages.stdout }} : updated'"
+      when: upgrade_logchange.stat.exists
+      tags:
+        - upgrade
 
-  - name: Aptitude clean
-    command: aptitude clean
-    register: upgrade_aptitude_clean
-    tags:
-      - upgrade
+    - name: Aptitude clean
+      command: aptitude clean
+      register: upgrade_aptitude_clean
+      tags:
+        - upgrade
 
-  - debug:
-      msg: "Standard out from `aptitude clean` : {{ upgrade_aptitude_clean }}"
-      verbosity: 1
-    tags:
-      - upgrade
+    - debug:
+        msg: "Standard out from `aptitude clean` : {{ upgrade_aptitude_clean }}"
+        verbosity: 1
+      tags:
+        - upgrade
 
   when: upgrade_packages.stdout != ""
 
@@ -144,3 +147,4 @@
   tags:
     - upgrade
     - munin
+...

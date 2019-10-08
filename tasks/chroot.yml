@@ -1,54 +1,68 @@
 ---
-- name: Update package lists in the chroot
-  command: "chroot {{ chroot_dir | default('/chroot') }} apt-get -qq update"
-  register: upgrade_chroot_apt_get_update
+- name: "Check that apt-get exists in {{ chroot_dir | default('/chroot') }}"
+  stat:
+    path: /usr/bin/apt-get
+  register: upgrade_chroot_apt
   tags:
     - upgrade
     - chroot
 
-- debug:
-    msg: "Standard out from `chroot {{ chroot_dir | default('/chroot') }} apt-get -qq update` : {{ upgrade_chroot_apt_get_update.stdout }}"
-    verbosity: 1
-  tags:
-    - upgrade
-    - chroot
+- name: "When apt-get exists in {{ chroot_dir | default('/chroot') }}" 
+  block:
 
-- debug:
-    msg: "Standard error from `chroot {{ chroot_dir | default('/chroot') }} apt-get -qq update` : {{ upgrade_chroot_apt_get_update.stderr }}"
-    verbosity: 1
-  tags:
-    - upgrade
-    - chroot
+    - name: Update package lists in the chroot
+      command: "chroot {{ chroot_dir | default('/chroot') }} DEBIAN_FRONTEND=noninteractive apt-get -qq update"
+      register: upgrade_chroot_apt_get_update
+      tags:
+        - upgrade
+        - chroot
 
-- name: Dist-upgrade in the chroot
-  command: "chroot {{ chroot_dir | default('/chroot') }} apt-get dist-upgrade -y"
-  register: upgrade_chroot_apt_get_dist_upgrade
-  tags:
-    - upgrade
-    - chroot
+    - debug:
+        msg: "Standard out from `chroot {{ chroot_dir | default('/chroot') }} apt-get -qq update` : {{ upgrade_chroot_apt_get_update.stdout }}"
+        verbosity: 1
+      tags:
+        - upgrade
+        - chroot
 
-- debug:
-    msg: "Standard out from `chroot {{ chroot_dir | default('/chroot') }} apt-get dist-upgrade -y` : {{ upgrade_chroot_apt_get_dist_upgrade.stdout }}"
-    verbosity: 1
-  tags:
-    - upgrade
-    - chroot
+    - debug:
+        msg: "Standard error from `chroot {{ chroot_dir | default('/chroot') }} apt-get -qq update` : {{ upgrade_chroot_apt_get_update.stderr }}"
+        verbosity: 1
+      tags:
+        - upgrade
+        - chroot
 
-- debug:
-    msg: "Standard error from `chroot {{ chroot_dir | default('/chroot') }} apt-get dist-upgrade -y` : {{ upgrade_chroot_apt_get_dist_upgrade.stderr }}"
-    verbosity: 1
-  tags:
-    - upgrade
-    - chroot
+    - name: Dist-upgrade in the chroot
+      command: "chroot {{ chroot_dir | default('/chroot') }} DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::='--force-confold' dist-upgrade -fy"
+      register: upgrade_chroot_apt_get_dist_upgrade
+      tags:
+        - upgrade
+        - chroot
 
-- name: Remove set UID from files
-  shell: "for i in $( find {{ chroot_dir | default('/chroot') }} -perm -2000 ); do chmod g-s $i; done"
-  tags:
-    - upgrade
-    - chroot
+    - debug:
+        msg: "Standard out from `chroot {{ chroot_dir | default('/chroot') }} apt-get dist-upgrade -fy` : {{ upgrade_chroot_apt_get_dist_upgrade.stdout }}"
+        verbosity: 1
+      tags:
+        - upgrade
+        - chroot
 
-- name: Remove set UID from files
-  shell: "for i in $( find {{ chroot_dir | default('/chroot') }} -perm -4000 ); do chmod u-s $i; done"
-  tags:
-    - upgrade
-    - chroot
+    - debug:
+        msg: "Standard error from `chroot {{ chroot_dir | default('/chroot') }} apt-get dist-upgrade -fy` : {{ upgrade_chroot_apt_get_dist_upgrade.stderr }}"
+        verbosity: 1
+      tags:
+        - upgrade
+        - chroot
+
+    - name: Remove set UID from files
+      shell: "for i in $( find {{ chroot_dir | default('/chroot') }} -perm -2000 ); do chmod g-s $i; done"
+      tags:
+        - upgrade
+        - chroot
+
+    - name: Remove set UID from files
+      shell: "for i in $( find {{ chroot_dir | default('/chroot') }} -perm -4000 ); do chmod u-s $i; done"
+      tags:
+        - upgrade
+        - chroot
+
+  when: ( upgrade_chroot_apt is defined ) and ( upgrade_chroot_apt.stat.exists )
+...
