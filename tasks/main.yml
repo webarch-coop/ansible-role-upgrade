@@ -49,6 +49,7 @@
     executable: /bin/bash
   environment:
     DEBIAN_FRONTEND: noninteractive
+  check_mode: false
   register: upgrade_packages
   tags:
     - upgrade
@@ -56,12 +57,14 @@
 - debug:
     msg: "Standard out from `apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs` : {{ upgrade_packages.stdout }}"
     verbosity: 1
+  when: ( upgrade_packages is defined ) and ( upgrade_packages.stdout != "" )
   tags:
     - upgrade
 
 - debug:
     msg: "Standard error from `apt-get -fq dist-upgrade -q | grep '^The following' -A1 | grep '^ ' | xargs` : {{ upgrade_packages.stderr }}"
     verbosity: 1
+  when: ( upgrade_packages is defined ) and ( upgrade_packages.stderr != "" )
   tags:
     - upgrade
 
