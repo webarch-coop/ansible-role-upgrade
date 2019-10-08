@@ -11,7 +11,9 @@
   block:
 
     - name: Update package lists in the chroot
-      command: "chroot {{ chroot_dir | default('/chroot') }} DEBIAN_FRONTEND=noninteractive apt-get -qq update"
+      command: "chroot {{ chroot_dir | default('/chroot') }} apt-get -qq update"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
       check_mode: false
       register: upgrade_chroot_apt_get_update
       tags:
@@ -40,7 +42,9 @@
       when: upgrade_chroot_apt_get_update is defined
 
     - name: Dist-upgrade in the chroot
-      command: "chroot {{ chroot_dir | default('/chroot') }} DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::='--force-confold' dist-upgrade -fy"
+      command: "chroot {{ chroot_dir | default('/chroot') }} apt-get -o Dpkg::Options::='--force-confold' dist-upgrade -fy"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
       register: upgrade_chroot_apt_get_dist_upgrade
       tags:
         - upgrade
