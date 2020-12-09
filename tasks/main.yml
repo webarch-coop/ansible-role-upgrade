@@ -141,7 +141,7 @@
       service:
         name: docker
         state: restarted
-      when: ( "docker-ce" in upgrade_dist_upgrade.stdout )
+      when: ( "docker-ce" in upgrade_dist_upgrade.stdout ) or ( "containerd.io" in upgrade_dist_upgrade.stdout )
 
   when: ( upgrade_packages is defined ) and ( upgrade_packages.stdout | length > 0 )
 
