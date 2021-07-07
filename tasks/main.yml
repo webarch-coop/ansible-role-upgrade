@@ -36,13 +36,17 @@
       - apt-utils
       - apticron
       - aptitude
-      - python-apt
       - python3-apt
     state: latest
     update_cache: false
   register: upgrade_apt
   tags:
     - upgrade
+
+- name: Package python-apt present for Debian Jessie and Stretch
+  apt:
+    pkg: python-apt
+  when: ansible_distribution_release is regex('jessie|stretch')
 
 - name: Update the Changelog if apt packages have been installed or updated
   command: "logchange '{{ upgrade_apt.stdout }} : updated'"
