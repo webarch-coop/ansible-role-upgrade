@@ -9,22 +9,12 @@
   tags:
     - upgrade
 
-- name: Update the apt cache and run apt-get update --allow-releaseinfo-change if it fails
-  block:
-
-    - name: Update the apt cache
-      apt:
-        update_cache: true
-        cache_valid_time: 0
-      tags:
-        - upgrade
-
-  rescue:
-
-    - name: Update the apt cache and allow-releaseinfo-change
-      command: apt-get update --allow-releaseinfo-change
-      tags:
-        - upgrade
+- name: Update the apt cache
+  apt:
+    update_cache: true
+    cache_valid_time: 0
+  tags:
+    - upgrade
 
 - name: Apt packages present
   apt:
