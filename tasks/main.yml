@@ -39,7 +39,7 @@
   when: ansible_distribution_release is regex('jessie|stretch')
 
 - name: Update the Changelog if apt packages have been installed or updated
-  command: "logchange '{{ upgrade_apt.stdout }} : updated'"
+  command: "logchange '{{ upgrade_apt.stdout | quote }} : updated'"
   when: upgrade_logchange.stat.exists and upgrade_apt.changed
   tags:
     - upgrade
@@ -106,7 +106,7 @@
         - upgrade
 
     - name: Update the Changelog
-      command: "logchange '{{ upgrade_packages.stdout }} : updated'"
+      command: "logchange '{{ upgrade_packages.stdout | quote }} : updated'"
       when: upgrade_logchange.stat.exists
 
     - name: Aptitude clean
