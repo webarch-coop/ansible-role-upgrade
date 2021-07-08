@@ -15,6 +15,7 @@
   environment:
     PATH: /bin:/sbin:/usr/bin:/usr/sbin
   register: upgrade_munin_run_apt_all
+  check_mode: false
   when: upgrade_apt_state.changed
   tags:
     - upgrade

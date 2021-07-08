@@ -15,6 +15,7 @@
       environment:
         DEBIAN_FRONTEND: noninteractive
       check_mode: false
+      changed_when: false
       register: upgrade_chroot_apt_get_update
 
     - name: Debugging
@@ -23,12 +24,16 @@
         - debug:
             msg: "Standard out from `chroot {{ chroot_dir | default('/chroot') }} apt-get -qq update` : {{ upgrade_chroot_apt_get_update.stdout }}"
             verbosity: 1
-          when: upgrade_chroot_apt_get_update.stdout | length > 0
+          when:
+            - upgrade_chroot_apt_get_update.stdout is defined
+            - upgrade_chroot_apt_get_update.stdout | length > 0
 
         - debug:
             msg: "Standard error from `chroot {{ chroot_dir | default('/chroot') }} apt-get -qq update` : {{ upgrade_chroot_apt_get_update.stderr }}"
             verbosity: 1
-          when: upgrade_chroot_apt_get_update.stderr | length > 0
+          when:
+            - upgrade_chroot_apt_get_update.stderr is defined
+            - upgrade_chroot_apt_get_update.stderr | length > 0
 
       when: upgrade_chroot_apt_get_update is defined
 
@@ -51,7 +56,9 @@
             verbosity: 1
           when: upgrade_chroot_apt_get_dist_upgrade.stderr | length > 0
 
-      when: upgrade_chroot_apt_get_dist_upgrade is defined
+      when:
+        - not ansible_check_mode
+        - upgrade_chroot_apt_get_dist_upgrade is defined
 
     - name: Apt autoremove in the /chroot
       command: "chroot {{ chroot_dir | default('/chroot') }} apt autoremove -yfq"
@@ -65,14 +72,20 @@
         - debug:
             msg: "Standard out from `chroot {{ chroot_dir | default('/chroot') }} apt autoremove -yfq`"
             verbosity: 1
-          when: upgrade_chroot_apt_autoremove.stdout | length > 0
+          when:
+            - upgrade_chroot_apt_autoremove.stdout is defined
+            - upgrade_chroot_apt_autoremove.stdout | length > 0
 
         - debug:
             msg: "Standard error from `chroot {{ chroot_dir | default('/chroot') }} apt autoremove -yfq`"
             verbosity: 1
-          when: upgrade_chroot_apt_autoremove.stderr | length > 0
+          when:
+            - upgrade_chroot_apt_autoremove.stderr is defined
+            - upgrade_chroot_apt_autoremove.stderr | length > 0
 
-      when: upgrade_chroot_apt_autoremove is defined
+      when:
+        - not ansible_check_mode
+        - upgrade_chroot_apt_autoremove is defined
 
     - name: Remove set GID from files
       shell: "for i in $( find {{ chroot_dir | default('/chroot') }} -perm -2000 ); do chmod g-s $i; done"
