@@ -8,6 +8,15 @@
     - upgrade
     - munin
 
+- name: Delete the apt_all state file
+  file:
+    path: /var/lib/munin-node/plugin-state/nobody/plugin-apt_all.state
+    state: absent
+  register: upgrade_apt_all_state
+  tags:
+    - upgrade
+    - munin
+
 - name: Munin tasks
   block:
 
@@ -30,7 +39,7 @@
         verbosity: 1
       when: upgrade_munin_run_apt_all is defined
 
-  when: upgrade_apt_state.changed
+  when: upgrade_apt_state.changed or upgrade_apt_all_state.changed
   tags:
     - upgrade
     - munin
