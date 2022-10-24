@@ -24,7 +24,7 @@
         - name: Debug chroot apt-get update standard out
           ansible.builtin.debug:
             msg: "Standard out from `chroot {{ chroot_dir | default('/chroot') }} apt-get -qq update` : {{ upgrade_chroot_apt_get_update.stdout }}"
-            verbosity: 1
+            verbosity: 2
           when:
             - upgrade_chroot_apt_get_update.stdout is defined
             - upgrade_chroot_apt_get_update.stdout | length > 0
@@ -32,7 +32,7 @@
         - name: Debug chroot apt-get update standard error
           ansible.builtin.debug:
             msg: "Standard error from `chroot {{ chroot_dir | default('/chroot') }} apt-get -qq update` : {{ upgrade_chroot_apt_get_update.stderr }}"
-            verbosity: 1
+            verbosity: 2
           when:
             - upgrade_chroot_apt_get_update.stderr is defined
             - upgrade_chroot_apt_get_update.stderr | length > 0
@@ -53,13 +53,13 @@
         - name: Debug chroot apt-get dist-upgrade standard out
           ansible.builtin.debug:
             msg: "Standard out from `chroot {{ chroot_dir | default('/chroot') }} apt-get dist-upgrade -fy` : {{ upgrade_chroot_apt_get_dist_upgrade.stdout }}"
-            verbosity: 1
+            verbosity: 2
           when: upgrade_chroot_apt_get_dist_upgrade.stdout | length > 0
 
         - name: Debug chroot apt-get dist-upgrade standard error
           ansible.builtin.debug:
             msg: "Standard error from `chroot {{ chroot_dir | default('/chroot') }} apt-get dist-upgrade -fy` : {{ upgrade_chroot_apt_get_dist_upgrade.stderr }}"
-            verbosity: 1
+            verbosity: 2
           when: upgrade_chroot_apt_get_dist_upgrade.stderr | length > 0
 
       when:
@@ -79,7 +79,7 @@
         - name: Debug chroot apt autoremove standard out
           ansible.builtin.debug:
             msg: "Standard out from `chroot {{ chroot_dir | default('/chroot') }} apt autoremove -yfq`"
-            verbosity: 1
+            verbosity: 2
           when:
             - upgrade_chroot_apt_autoremove.stdout is defined
             - upgrade_chroot_apt_autoremove.stdout | length > 0
@@ -87,7 +87,7 @@
         - name: Debug chroot apt autoremove standard error
           ansible.builtin.debug:
             msg: "Standard error from `chroot {{ chroot_dir | default('/chroot') }} apt autoremove -yfq`"
-            verbosity: 1
+            verbosity: 2
           when:
             - upgrade_chroot_apt_autoremove.stderr is defined
             - upgrade_chroot_apt_autoremove.stderr | length > 0
