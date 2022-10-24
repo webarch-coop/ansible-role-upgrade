@@ -1,6 +1,8 @@
 ---
 # https://docs.ansible.com/ansible-lint/rules/default_rules.html
 skip_list:
+  - key-order[task]
+  - schema[meta]
   # Lines should be no longer than 160 chars
   - "204"
   # Commands should not change things if nothing needs doing
@@ -14,6 +16,6 @@ skip_list:
   # Tasks that run when changed should likely be handlers
   - "503"
   # Package installs should not use latest
-  - "403" 
+  - "403"
 # vim: syntax=yaml
 ...

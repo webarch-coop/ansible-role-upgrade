@@ -1,0 +1,4 @@
+---
+# If this is true a MTA will be installed, this needs to be false for Mailcow servers
+upgrade_apticron: false
+...

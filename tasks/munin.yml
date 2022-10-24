@@ -1,6 +1,6 @@
 ---
 - name: Delete the apt state file
-  file:
+  ansible.builtin.file:
     path: /var/lib/munin-node/plugin-state/nobody/plugin-apt.state
     state: absent
   register: upgrade_apt_state
@@ -9,7 +9,7 @@
     - munin
 
 - name: Delete the apt_all state file
-  file:
+  ansible.builtin.file:
     path: /var/lib/munin-node/plugin-state/nobody/plugin-apt_all.state
     state: absent
   register: upgrade_apt_all_state
@@ -21,7 +21,7 @@
   block:
 
     - name: Check the Munin apt_all plugin output
-      command: munin-run apt_all
+      ansible.builtin.command: munin-run apt_all
       args:
         chdir: /etc/munin/plugins
       environment:
@@ -29,21 +29,23 @@
       register: upgrade_munin_run_apt_all
       check_mode: false
 
-    - debug:
+    - name: Standard out from munin-run apt_all
+      ansible.builtin.debug:
         msg: "Standard out from `munin-run apt_all` : {{ upgrade_munin_run_apt_all.stdout }}"
-        verbosity: 1
+        verbosity: 2
       when:
         - upgrade_munin_run_apt_all.stdout is defined
         - upgrade_munin_run_apt_all.stdout | length > 0
 
-    - debug:
+    - name: Standard error from munin-run apt_all
+      ansible.builtin.debug:
         msg: "Standard error from `munin-run apt_all` : {{ upgrade_munin_run_apt_all.stderr }}"
-        verbosity: 1
+        verbosity: 2
       when:
         - upgrade_munin_run_apt_all.stderr is defined
         - upgrade_munin_run_apt_all.stderr | length > 0
 
-  when: upgrade_apt_state.changed or upgrade_apt_all_state.changed
+  when: (upgrade_apt_state.changed | bool) or (upgrade_apt_all_state.changed | bool)
   tags:
     - upgrade
     - munin

@@ -3,28 +3,27 @@
 
 # The logchange script is in the https://git.coop/webarch/scripts repo
 - name: Check the existance of /usr/local/bin/logchange
-  stat:
+  ansible.builtin.stat:
     path: /usr/local/bin/logchange
   register: upgrade_logchange
   tags:
     - upgrade
 
 - name: Update the apt cache
-  apt:
+  ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 0
   tags:
     - upgrade
 
 - name: Apt packages present
-  apt:
+  ansible.builtin.apt:
     pkg:
       - apt
       - apt-listchanges
       - apt-show-versions
       - apt-transport-https
       - apt-utils
-      - apticron
       - aptitude
       - python3-apt
     state: latest
@@ -33,20 +32,29 @@
   tags:
     - upgrade
 
+- name: Apticron present
+  ansible.builtin.apt:
+    pkg:
+      - apticron
+    state: present
+  when: upgrade_apticron | bool
+  tags:
+    - upgrade
+
 - name: Package python-apt present for Debian Jessie and Stretch
-  apt:
+  ansible.builtin.apt:
     pkg: python-apt
   when: ansible_distribution_release is regex('jessie|stretch')
 
 - name: Update the Changelog if apt packages have been installed or updated
-  command: "logchange '{{ upgrade_apt.stdout | quote }} : updated'"
-  when: upgrade_logchange.stat.exists and upgrade_apt.changed
+  ansible.builtin.command: "logchange '{{ upgrade_apt.stdout | quote }} : updated'"
+  when: (upgrade_logchange.stat.exists | bool) and (upgrade_apt.changed | bool)
   tags:
     - upgrade
 
 # Unlike `apt-show-versions -b -u` the following will also list new packages
 - name: Check for updates and new packages using apt-get dist-upgrade -q -s
-  shell: apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
+  ansible.builtin.shell: apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
   args:
     warn: false
     executable: /bin/bash
@@ -61,22 +69,24 @@
 - name: When upgrade_packages is defined and not empty
   block:
 
-    - debug:
+    - name: Standard out from apt-get dist-upgrade
+      ansible.builtin.debug:
         msg: "Standard out from `apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs` : {{ upgrade_packages.stdout }}"
-        verbosity: 1
+        verbosity: 2
       when: upgrade_packages.stdout is defined
 
-    - debug:
+    - name: Standard error from apt-get dist-upgrade
+      ansible.builtin.debug:
         msg: "Standard error from `apt-get -fq dist-upgrade -q | grep '^The following' -A1 | grep '^ ' | xargs` : {{ upgrade_packages.stderr }}"
-        verbosity: 1
+        verbosity: 2
       when: upgrade_packages.stderr is defined
 
     - name: Print the list of packages to be upgraded
-      debug:
+      ansible.builtin.debug:
         msg: "The following packages are to be upgraded: {{ upgrade_packages.stdout }}"
 
     - name: Dist upgrade
-      apt:
+      ansible.builtin.apt:
         upgrade: dist
         update_cache: false
         autoclean: true
@@ -89,16 +99,18 @@
     - name: Debugging
       block:
 
-        - debug:
+        - name: Standard out from aptitude dist-upgrade
+          ansible.builtin.debug:
             msg: "Standard out from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stdout }}"
-            verbosity: 1
+            verbosity: 2
           when: upgrade_dist_upgrade.stdout | length > 0
           tags:
             - upgrade
 
-        - debug:
+        - name: Standard error from aptitude dist-upgrade
+          ansible.builtin.debug:
             msg: "Standard error from `aptitude dist-upgrade` : {{ upgrade_dist_upgrade.stderr }}"
-            verbosity: 1
+            verbosity: 2
           when: upgrade_dist_upgrade.stderr | length > 0
 
       when: upgrade_dist_upgrade is defined
@@ -106,30 +118,31 @@
         - upgrade
 
     - name: Update the Changelog
-      command: "logchange '{{ upgrade_packages.stdout | quote }} : updated'"
-      when: upgrade_logchange.stat.exists
+      ansible.builtin.command: "logchange '{{ upgrade_packages.stdout | quote }} : updated'"
+      when: upgrade_logchange.stat.exists | bool
 
     - name: Aptitude clean
-      command: aptitude clean
+      ansible.builtin.command: aptitude clean
       register: upgrade_aptitude_clean
 
-    - debug:
+    - name: Standard out from aptitude clean
+      ansible.builtin.debug:
         msg: "Standard out from `aptitude clean` : {{ upgrade_aptitude_clean }}"
-        verbosity: 1
-      when: ( upgrade_aptitude_clean is defined ) and ( upgrade_aptitude_clean | length > 0 )
+        verbosity: 2
+      when: (upgrade_aptitude_clean is defined) and (upgrade_aptitude_clean | length > 0)
 
     - name: Restart Docker if it has been updated
-      service:
+      ansible.builtin.service:
         name: docker
         state: restarted
-      when: ( "docker-ce" in upgrade_dist_upgrade.stdout ) or ( "containerd.io" in upgrade_dist_upgrade.stdout )
+      when: ("docker-ce" in upgrade_dist_upgrade.stdout) or ("containerd.io" in upgrade_dist_upgrade.stdout)
 
-  when: ( upgrade_packages is defined ) and ( upgrade_packages.stdout | length > 0 )
+  when: (upgrade_packages is defined) and (upgrade_packages.stdout | length > 0)
   tags:
     - upgrade
 
 - name: Check the existance of /chroot
-  stat:
+  ansible.builtin.stat:
     path: /chroot
   register: upgrade_chroot
   tags:
@@ -137,14 +150,14 @@
     - chroot
 
 - name: Conditionally include chroot tasks
-  include_tasks: chroot.yml
-  when: upgrade_chroot.stat.exists
+  ansible.builtin.include_tasks: chroot.yml
+  when: upgrade_chroot.stat.exists | bool
   tags:
     - upgrade
     - chroot
 
 - name: Check the existance of /etc/munin/plugins/apt_all
-  stat:
+  ansible.builtin.stat:
     path: /etc/munin/plugins/apt_all
   register: upgrade_munin_plugin_apt_all
   tags:
@@ -152,8 +165,8 @@
     - munin
 
 - name: Conditionally include munin tasks
-  include_tasks: munin.yml
-  when: upgrade_munin_plugin_apt_all.stat.exists
+  ansible.builtin.include_tasks: munin.yml
+  when: upgrade_munin_plugin_apt_all.stat.exists | bool
   tags:
     - upgrade
     - munin
