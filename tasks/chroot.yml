@@ -41,7 +41,7 @@
 
     - name: Include the chroot upgrade tasks
       ansible.builtin.include_tasks: chroot_upgrade.yml
-      when: upgrade_chroot_packages_command.stdout_lines A length > 0
+      when: upgrade_chroot_packages_command.stdout_lines | length > 0
 
   tags:
     - upgrade

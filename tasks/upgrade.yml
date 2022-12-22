@@ -3,10 +3,10 @@
   block:
 
     # TODO replace this with something more elegant
-    - name: Check for updates and new packages using apt-get dist-upgrade -q -s
+    - name: Check for updates and new packages using apt-get -fq dist-upgrade -sq
       ansible.builtin.shell: |
         set -e -o pipefail
-        apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
+        apt-get -fq dist-upgrade -sq | grep ^Inst | awk '{ print $2 }' | xargs
       args:
         executable: "{{ ansible_local.bash.path }}"
       environment:
@@ -21,11 +21,11 @@
         - name: Debugging
           block:
 
-            - name: Standard out from `apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs`
+            - name: "Standard out from `apt-get -fq dist-upgrade -sq | grep ^Inst | awk '{ print $2 }' | xargs`"
               ansible.builtin.debug:
                 var: upgrade_packages.stdout
 
-            - name: Standard error from `apt-get -fq dist-upgrade -q | grep '^The following' -A1 | grep '^ ' | xargs`
+            - name: "Standard error from `apt-get -fq dist-upgrade -sq | grep ^Inst | awk '{ print $2 }' | xargs`"
               ansible.builtin.debug:
                 var: upgrade_packages.stderr
 
