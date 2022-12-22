@@ -3,7 +3,7 @@
   block:
 
     - name: Dist-upgrade in the chroot  # noqa yaml[comments] command-instead-of-module
-      ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -o Dpkg::Options::='--force-confold' dist-upgrade -fy"
+      ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -o Dpkg::Options::='--force-confold' dist-upgrade -fyq"
       environment:
         DEBIAN_FRONTEND: noninteractive
       register: upgrade_chroot_apt_get_dist_upgrade
@@ -23,7 +23,7 @@
       when: >-
         ( not ansible_check_mode | bool and ansible_verbosity > 1 ) and (
         ( upgrade_chroot_apt_get_dist_upgrade.stdout is defined and upgrade_chroot_apt_get_dist_upgrade.stdout | length > 0 ) or
-        ( upgrade_chroot_apt_get_dist_upgrade.stderrs defined and upgrade_chroot_apt_get_dist_upgrade.stderr | length > 0 ) )
+        ( upgrade_chroot_apt_get_dist_upgrade.stderr is defined and upgrade_chroot_apt_get_dist_upgrade.stderr | length > 0 ) )
 
     - name: Apt autoremove in the chroot  # noqa yaml[comments] command-instead-of-module
       ansible.builtin.command: "chroot {{ upgrade_chroot }} apt autoremove -yfq"
