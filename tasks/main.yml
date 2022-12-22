@@ -49,7 +49,7 @@
         set -e -o pipefail
         apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
       args:
-        executable: "{{ ansible_local.bash }}"
+        executable: "{{ ansible_local.bash.path }}"
       environment:
         DEBIAN_FRONTEND: noninteractive
       check_mode: false
