@@ -2,6 +2,7 @@
 - name: Upgrade Debian packages
   block:
 
+    # TODO replace this with something more elegant
     - name: Check for updates and new packages using apt-get dist-upgrade -q -s
       ansible.builtin.shell: |
         set -e -o pipefail
