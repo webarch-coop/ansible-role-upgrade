@@ -20,7 +20,7 @@ If `upgrade` is `true` tasks in this role will be run, set it to `false` for ser
 
 ### upgrade_apticron
 
-If `upgrade_apticron` is `true` a MTA will be installedi for `apticron`, this needs to be false for servere that already have a MTA listening on a SMTP port. It defaults to `false`.
+If `upgrade_apticron` is `true` a MTA will be installed for `apticron`, this needs to be false for servers that already have a MTA listening on a SMTP port. It defaults to `false`.
 
 ## upgrade_chroot
 

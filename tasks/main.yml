@@ -109,6 +109,12 @@
             ( upgrade_dist_upgrade.stdout | length > 0 ) or
             ( pgrade_dist_upgrade.stderr | length > 0 ) )
 
+        # The logchange script is in the https://git.coop/webarch/scripts repo
+        - name: Check the existance of /usr/local/bin/logchange
+          ansible.builtin.stat:
+            path: /usr/local/bin/logchange
+          register: upgrade_logchange
+
         - name: Update the Changelog
           ansible.builtin.command: "logchange '{{ upgrade_packages.stdout | quote }} : updated'"
           when: upgrade_logchange.stat.exists | bool
