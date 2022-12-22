@@ -24,7 +24,7 @@
             update_cache: false
             autoclean: true
             autoremove: true
-            dpkg_options: force-confold
+            dpkg_options: force-confdef,force-confold
           environment:
             DEBIAN_FRONTEND: noninteractive
             PATH: /bin:/sbin:/usr/bin:/usr/sbin

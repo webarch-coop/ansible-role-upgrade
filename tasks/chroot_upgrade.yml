@@ -3,7 +3,8 @@
   block:
 
     - name: Dist-upgrade in the chroot  # noqa yaml[comments] command-instead-of-module
-      ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -o Dpkg::Options::='--force-confold' dist-upgrade -fyq"
+      ansible.builtin.command: >-
+        chroot {{ upgrade_chroot }} apt-get -fyqo Dpkg::Options::='--force-confdef --force-confold' dist-upgrade
       environment:
         DEBIAN_FRONTEND: noninteractive
       register: upgrade_chroot_apt_get_dist_upgrade
