@@ -52,6 +52,11 @@
       changed_when: false
       register: upgrade_packages_command
 
+    - name: Debugging
+      ansible.builtin.debug:
+        var: upgrade_packages_command
+        verbosity: 3
+
     # Unlike `apt-show-versions -b -u` the following will also list new packages
     - name: Check for updates and new packages using apt-get dist-upgrade -q -s
       ansible.builtin.shell: |
@@ -64,7 +69,7 @@
       check_mode: false
       changed_when: false
       register: upgrade_packages
-      when: upgrade_packages_command.stdout_lines.last != "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."
+      when: upgrade_packages_command.stdout_lines | last != "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."
 
     - name: When upgrade_packages is defined and not empty
       block:
@@ -148,35 +153,27 @@
             ( "docker-ce" in upgrade_dist_upgrade.stdout ) or
             ( "containerd.io" in upgrade_dist_upgrade.stdout )
 
+        - name: Check the existance of /etc/munin/plugins/apt_all
+          ansible.builtin.stat:
+            path: /etc/munin/plugins/apt_all
+          register: upgrade_munin_plugin_apt_all
+
+        - name: Conditionally include munin tasks
+          ansible.builtin.include_tasks: munin.yml
+          when: upgrade_munin_plugin_apt_all.stat.exists | bool
+
       when:
         - upgrade_packages is defined
-        - upgrade_packages.stdout | length > 0
+        - upgrade_packages.stdout is defined
 
     - name: Check the existance of the chroot path
       ansible.builtin.stat:
         path: "{{ upgrade_chroot }}"
       register: upgrade_chroot
-      tags:
-        - chroot
 
     - name: Conditionally include chroot tasks
       ansible.builtin.include_tasks: chroot.yml
       when: upgrade_chroot.stat.exists | bool
-      tags:
-        - chroot
-
-    - name: Check the existance of /etc/munin/plugins/apt_all
-      ansible.builtin.stat:
-        path: /etc/munin/plugins/apt_all
-      register: upgrade_munin_plugin_apt_all
-      tags:
-        - munin
-
-    - name: Conditionally include munin tasks
-      ansible.builtin.include_tasks: munin.yml
-      when: upgrade_munin_plugin_apt_all.stat.exists | bool
-      tags:
-        - munin
 
   when: upgrade | bool
   tags:
