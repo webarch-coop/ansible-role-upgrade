@@ -4,12 +4,6 @@
 
 This repository contains an Ansible role for updating Debian servers.
 
-## Dependencies
-
-This role includes the following Webarchitects roles:
-
-* [apt](https://git.coop/webarch/apt)
-
 ## Role variables
 
 See the [defaults/main.yml](defaults/main.yml) file for the default variables and [meta/argument_spacs.yml](meta/argument_specs.yml) for the variable specification.
@@ -17,10 +11,6 @@ See the [defaults/main.yml](defaults/main.yml) file for the default variables an
 ### upgrade
 
 If `upgrade` is `true` tasks in this role will be run, set it to `false` for servers that should not be upgraded using Ansible, it defaults to `true`.
-
-### upgrade_apticron
-
-If `upgrade_apticron` is `true` a MTA will be installed for `apticron`, this needs to be false for servers that already have a MTA listening on a SMTP port. It defaults to `false`.
 
 ## upgrade_chroot
 

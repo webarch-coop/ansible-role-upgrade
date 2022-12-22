@@ -2,12 +2,6 @@
 - name: Update and upgrade Debian
   block:
 
-    - name: Include the apt role when ansible_local.bash is not defined
-      ansible.builtin.include_role:
-        name: apt
-        tasks_from: local_facts.yml
-      when: ansible_local.bash is not defined
-
     - name: Update the apt cache
       ansible.builtin.apt:
         update_cache: true
@@ -20,14 +14,10 @@
       ansible.builtin.command: apt-get -fqqs dist-upgrade
       environment:
         DEBIAN_FRONTEND: noninteractive
+        PATH: /bin:/sbin:/usr/bin:/usr/sbin
       check_mode: false
       changed_when: false
       register: upgrade_packages_command
-
-    - name: Debugging
-      ansible.builtin.debug:
-        var: upgrade_packages_command
-        verbosity: 3
 
     - name: Include the upgrade tasks
       ansible.builtin.include_tasks: upgrade.yml

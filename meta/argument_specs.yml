@@ -9,10 +9,6 @@ argument_specs:
         type: bool
         required: true
         description: Run the tasks in this role.
-      upgrade_apticron:
-        type: bool
-        required: true
-        description: Install apticron, if this is true a MTA will be installed.
       upgrade_chroot:
         type: str
         required: false

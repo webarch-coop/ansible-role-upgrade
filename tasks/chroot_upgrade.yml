@@ -9,44 +9,12 @@
       register: upgrade_chroot_apt_get_dist_upgrade
       changed_when: ( "The following packages will be upgraded" in upgrade_chroot_apt_get_dist_upgrade.stdout )
 
-    - name: Debugging
-      block:
-
-        - name: Debug chroot apt-get dist-upgrade standard out
-          ansible.builtin.debug:
-            var: upgrade_chroot_apt_get_dist_upgrade.stdout
-
-        - name: Debug chroot apt-get dist-upgrade standard error
-          ansible.builtin.debug:
-            var: upgrade_chroot_apt_get_dist_upgrade.stderr
-
-      when: >-
-        ( not ansible_check_mode | bool and ansible_verbosity > 1 ) and (
-        ( upgrade_chroot_apt_get_dist_upgrade.stdout is defined and upgrade_chroot_apt_get_dist_upgrade.stdout | length > 0 ) or
-        ( upgrade_chroot_apt_get_dist_upgrade.stderr is defined and upgrade_chroot_apt_get_dist_upgrade.stderr | length > 0 ) )
-
     - name: Apt autoremove in the chroot  # noqa yaml[comments] command-instead-of-module
       ansible.builtin.command: "chroot {{ upgrade_chroot }} apt autoremove -yfq"
       environment:
         DEBIAN_FRONTEND: noninteractive
       changed_when: false
       register: upgrade_chroot_apt_autoremove
-
-    - name: Debugging
-      block:
-
-        - name: Debug chroot apt autoremove standard out
-          ansible.builtin.debug:
-            var: upgrade_chroot_apt_autoremove.stdout
-
-        - name: Debug chroot apt autoremove standard error
-          ansible.builtin.debug:
-            var: upgrade_chroot_apt_autoremove.stderr
-
-      when: >-
-        ( not ansible_check_mode | bool and ansible_verbosity > 1 ) and (
-        ( upgrade_chroot_apt_autoremove.stdout is defined and upgrade_chroot_apt_autoremove.stdout | length > 0 ) or
-        ( upgrade_chroot_apt_autoremove.stderr is defined and upgrade_chroot_apt_autoremove.stderr | length > 0 ) )
 
     - name: Remove set GID from files  # noqa yaml[comments] command-instead-of-module
       ansible.builtin.shell: "for i in $( find {{ upgrade_chroot }} -perm -2000 ); do chmod g-s $i; done"

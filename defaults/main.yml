@@ -1,8 +1,4 @@
 ---
-# If upgrade is false tasks in this roile will be skipped
 upgrade: true
-# If this is true a MTA will be installed, this needs to be false for Mailcow servers
-upgrade_apticron: false
-# Chroot path
 upgrade_chroot: /chroot
 ...

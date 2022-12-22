@@ -10,34 +10,13 @@
       changed_when: false
       register: upgrade_chroot_apt_get_update
 
-    - name: Debugging
-      block:
-
-        - name: Debug chroot apt-get update standard out
-          ansible.builtin.debug:
-            var: upgrade_chroot_apt_get_update.stdout
-
-        - name: Debug chroot apt-get update standard error
-          ansible.builtin.debug:
-            var: upgrade_chroot_apt_get_update.stderr
-
-      when: >-
-        ( ansible_verbosity > 1 ) and (
-        ( upgrade_chroot_apt_get_update.stdout is defined and upgrade_chroot_apt_get_update.stdout | length > 0 ) or
-        ( upgrade_chroot_apt_get_update.stderr is defined and upgrade_chroot_apt_get_update.stderr | length > 0 ) )
-
-    - name: Check for updates and new packages in the chroot using apt-get -fq dist-upgrade -sq  # noqa yaml[comments] command-instead-of-module
-      ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -fq dist-upgrade -sq"
+    - name: Check for updates in the chroot using apt-get -fqqs dist-upgrade  # noqa yaml[comments] command-instead-of-module
+      ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -fqqs dist-upgrade"
       environment:
         DEBIAN_FRONTEND: noninteractive
       check_mode: false
       changed_when: false
       register: upgrade_chroot_packages_command
-
-    - name: Debugging
-      ansible.builtin.debug:
-        var: upgrade_chroot_packages_command
-        verbosity: 3
 
     - name: Include the chroot upgrade tasks
       ansible.builtin.include_tasks: chroot_upgrade.yml
