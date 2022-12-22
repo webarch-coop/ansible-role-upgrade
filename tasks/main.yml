@@ -45,6 +45,15 @@
 
     # Unlike `apt-show-versions -b -u` the following will also list new packages
     - name: Check for updates and new packages using apt-get dist-upgrade -q -s
+      ansible.builtin.command: apt-get -fq dist-upgrade -s
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      check_mode: false
+      changed_when: false
+      register: upgrade_packages_command
+
+    # Unlike `apt-show-versions -b -u` the following will also list new packages
+    - name: Check for updates and new packages using apt-get dist-upgrade -q -s
       ansible.builtin.shell: |
         set -e -o pipefail
         apt-get -fq dist-upgrade -s | grep '^The following' -A1 | grep '^ ' | xargs
@@ -55,6 +64,7 @@
       check_mode: false
       changed_when: false
       register: upgrade_packages
+      when: upgrade_packages_command.stdout_lines.last != "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."
 
     - name: When upgrade_packages is defined and not empty
       block:
