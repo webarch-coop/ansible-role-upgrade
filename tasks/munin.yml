@@ -27,22 +27,6 @@
           check_mode: false
           changed_when: false
 
-        - name: Debugging
-          block:
-
-            - name: Standard out from munin-run apt_all
-              ansible.builtin.debug:
-                var: upgrade_munin_run_apt_all.stdout
-
-            - name: Standard error from munin-run apt_all
-              ansible.builtin.debug:
-                var: upgrade_munin_run_apt_all.stderr
-
-          when: >-
-            ( ansible_verbosity > 1 ) and (
-            ( upgrade_munin_run_apt_all.stdout is defined and upgrade_munin_run_apt_all.stdout | length > 0 ) or
-            ( upgrade_munin_run_apt_all.stderr is defined and upgrade_munin_run_apt_all.stderr | length > 0 ) )
-
       when: >-
         ( upgrade_apt_state.changed | bool ) or
         ( upgrade_apt_all_state.changed | bool )
