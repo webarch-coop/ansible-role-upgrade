@@ -16,7 +16,7 @@
       changed_when: false
 
     # Unlike `apt-show-versions -b -u` the following will also list new packages
-    - name: Check for updates and new packages using apt-get dist-upgrade -q -s
+    - name: Check for updates and new packages using apt-get dist-upgrade -q -s  # noqa yaml[comments] command-instead-of-module
       ansible.builtin.command: apt-get -fq dist-upgrade -s
       environment:
         DEBIAN_FRONTEND: noninteractive
