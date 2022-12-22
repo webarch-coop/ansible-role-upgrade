@@ -1,80 +1,37 @@
-# Ansible Debian Upgrade Role 
+# Webarchitects Ansible Debian update and upgrade Role 
 
-This repository contains an Ansible role for updating Webarchitects Debian servers.
+[![pipeline status](https://git.coop/webarch/upgrade/badges/master/pipeline.svg)](https://git.coop/webarch/upgrade/-/commits/master)
 
-To use this role you need to use Ansible Galaxy to install it into another repository by adding a `requirements.yml` file in that repo that contains:
+This repository contains an Ansible role for updating Debian servers.
 
-```yml
----
-- name: upgrade
-  src: https://git.coop/webarch/upgrade.git
-  version: master
-  scm: git
-```
+## Dependencies
 
-To pull this repo in run:
+This role includes the following Webarchitects roles:
 
-```bash
-ansible-galaxy install -r requirements.yml --force
-```
+* [apt](https://git.coop/webarch/apt)
 
-The other repo should also contain a `upgrade.yml` file that contains:
+## Role variables
 
-```yml
----
-- name: Upgrade the Debian servers
-  become: yes
+See the [defaults/main.yml](defaults/main.yml) file for the default variables and [meta/argument_spacs.yml](meta/argument_specs.yml) for the variable specification.
 
-  hosts:
-    - jessie_servers
-    - stretch_servers
+### upgrade
 
-  roles:
-    - upgrade
-```
+If `upgrade` is `true` tasks in this role will be run, set it to `false` for servers that should not be upgraded using Ansible, it defaults to `true`.
 
-And a `hosts.yml` file that contains lists of servers, for example:
+### upgrade_apticron
 
-```yml
----
-all:
-  children:
-    stretch_servers:
-      hosts:
-        host3.example.org:
-        host4.example.org:
-        cloud.example.com:
-        cloud.example.org:
-        cloud.example.net:
-    jessie_servers:
-      hosts:
-        host1.example.org:
-        host2.example.org:
-```
+If `upgrade_apticron` is `true` a MTA will be installedi for `apticron`, this needs to be false for servere that already have a MTA listening on a SMTP port. It defaults to `false`.
 
-Then it can be run as follows:
+## upgrade_chroot
 
-```bash
-ansible-playbook upgrade.yml -i hosts.yml
-```
+A path to a chroot that should be upgraded, if the path doesn't exist these tasks will be skipped, `upgrade_chroot` defaults to `/chroot`.
 
-You can also limit upgrades to just the Stretch server:
+## Repository
 
-```bash
-ansible-playbook upgrade.yml -i hosts.yml --limit="stretch_servers"
-```
+The primary URL of this repo is [`https://git.coop/webarch/upgrade`](https://git.coop/webarch/upgrade) however it is also [mirrored to GitHub](https://github.com/webarch-coop/ansible-role-upgrade) and [available via Ansible Galaxy](https://galaxy.ansible.com/chriscroome/upgrade).
 
-Or just one server:
+If you use this role please use a tagged release, see [the release notes](https://git.coop/webarch/upgrade/-/releases).
 
-```bash
-ansible-playbook upgrade.yml -i hosts.yml --limit="host1.example.org"
-```
+## License
 
-Or use wildcards to match several servers:
-
-```bash
-ansible-playbook upgrade.yml -i hosts.yml --limit="cloud*"
-```
-
-
-
+This role is released under [the same terms as Ansible itself](https://github.com/ansible/ansible/blob/devel/COPYING), the [GNU GPLv3](LICENSE).

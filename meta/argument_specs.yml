@@ -1,0 +1,20 @@
+---
+argument_specs:
+  main:
+    author: Chris Croome
+    description: Ansible role for upgrading Debian servers.
+    short_description: The main entry point for the upgrade role.
+    options:
+      upgrade:
+        type: bool
+        required: true
+        description: Run the tasks in this role.
+      upgrade_apticron:
+        type: bool
+        required: true
+        description: Install apticron, if this is true a MTA will be installed.
+      upgrade_chroot:
+        type: str
+        required: false
+        description: A path to a chroot that should be upgraded.
+...
