@@ -2,93 +2,46 @@
 - name: Chroot tasks
   block:
 
-    - name: Check that apt-get exists in the chroot
-      ansible.builtin.stat:
-        path: "{{ upgrade_chroot }}/usr/bin/apt-get"
-      register: upgrade_chroot_apt
+    - name: Update package lists in the chroot  # noqa yaml[comments] command-instead-of-module
+      ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -qq update"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      check_mode: false
+      changed_when: false
+      register: upgrade_chroot_apt_get_update
 
-    - name: When apt-get exists in the chroot
+    - name: Debugging
       block:
 
-        - name: Update package lists in the chroot  # noqa yaml[comments] command-instead-of-module
-          ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -qq update"
-          environment:
-            DEBIAN_FRONTEND: noninteractive
-          check_mode: false
-          changed_when: false
-          register: upgrade_chroot_apt_get_update
+        - name: Debug chroot apt-get update standard out
+          ansible.builtin.debug:
+            var: upgrade_chroot_apt_get_update.stdout
 
-        - name: Debugging
-          block:
+        - name: Debug chroot apt-get update standard error
+          ansible.builtin.debug:
+            var: upgrade_chroot_apt_get_update.stderr
 
-            - name: Debug chroot apt-get update standard out
-              ansible.builtin.debug:
-                var: upgrade_chroot_apt_get_update.stdout
+      when: >-
+        ( ansible_verbosity > 1 ) and (
+        ( upgrade_chroot_apt_get_update.stdout is defined and upgrade_chroot_apt_get_update.stdout | length > 0 ) or
+        ( upgrade_chroot_apt_get_update.stderr is defined and upgrade_chroot_apt_get_update.stderr | length > 0 ) )
 
-            - name: Debug chroot apt-get update standard error
-              ansible.builtin.debug:
-                var: upgrade_chroot_apt_get_update.stderr
+    - name: Check for updates and new packages in the chroot using apt-get dist-upgrade -q -s  # noqa yaml[comments] command-instead-of-module
+      ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -fq dist-upgrade -s"
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+      check_mode: false
+      changed_when: false
+      register: upgrade_chroot_packages_command
 
-          when: >-
-            ( ansible_verbosity > 1 ) and (
-            ( upgrade_chroot_apt_get_update.stdout is defined and upgrade_chroot_apt_get_update.stdout | length > 0 ) or
-            ( upgrade_chroot_apt_get_update.stderr is defined and upgrade_chroot_apt_get_update.stderr | length > 0 ) )
+    - name: Debugging
+      ansible.builtin.debug:
+        var: upgrade_chroot_packages_command
+        verbosity: 3
 
-        - name: Dist-upgrade in the chroot  # noqa yaml[comments] command-instead-of-module
-          ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -o Dpkg::Options::='--force-confold' dist-upgrade -fy"
-          environment:
-            DEBIAN_FRONTEND: noninteractive
-          register: upgrade_chroot_apt_get_dist_upgrade
-          changed_when: ( "The following packages will be upgraded" in upgrade_chroot_apt_get_dist_upgrade.stdout )
-
-        - name: Debugging
-          block:
-
-            - name: Debug chroot apt-get dist-upgrade standard out
-              ansible.builtin.debug:
-                var: upgrade_chroot_apt_get_dist_upgrade.stdout
-
-            - name: Debug chroot apt-get dist-upgrade standard error
-              ansible.builtin.debug:
-                var: upgrade_chroot_apt_get_dist_upgrade.stderr
-
-          when: >-
-            ( not ansible_check_mode | bool and ansible_verbosity > 1 ) and (
-            ( upgrade_chroot_apt_get_dist_upgrade.stdout is defined and upgrade_chroot_apt_get_dist_upgrade.stdout | length > 0 ) or
-            ( upgrade_chroot_apt_get_dist_upgrade.stderrs defined and upgrade_chroot_apt_get_dist_upgrade.stderr | length > 0 ) )
-
-        - name: Apt autoremove in the chroot  # noqa yaml[comments] command-instead-of-module
-          ansible.builtin.command: "chroot {{ upgrade_chroot }} apt autoremove -yfq"
-          environment:
-            DEBIAN_FRONTEND: noninteractive
-          changed_when: false
-          register: upgrade_chroot_apt_autoremove
-
-        - name: Debugging
-          block:
-
-            - name: Debug chroot apt autoremove standard out
-              ansible.builtin.debug:
-                var: upgrade_chroot_apt_autoremove.stdout
-
-            - name: Debug chroot apt autoremove standard error
-              ansible.builtin.debug:
-                var: upgrade_chroot_apt_autoremove.stderr
-
-          when: >-
-            ( not ansible_check_mode | bool and ansible_verbosity > 1 ) and (
-            ( upgrade_chroot_apt_autoremove.stdout is defined and upgrade_chroot_apt_autoremove.stdout | length > 0 ) or
-            ( upgrade_chroot_apt_autoremove.stderr is defined and upgrade_chroot_apt_autoremove.stderr | length > 0 ) )
-
-        - name: Remove set GID from files  # noqa yaml[comments] command-instead-of-module
-          ansible.builtin.shell: "for i in $( find {{ upgrade_chroot }} -perm -2000 ); do chmod g-s $i; done"
-          changed_when: false
-
-        - name: Remove set UID from files  # noqa yaml[comments] command-instead-of-module
-          ansible.builtin.shell: "for i in $( find {{ upgrade_chroot }} -perm -4000 ); do chmod u-s $i; done"
-          changed_when: false
-
-      when: (upgrade_chroot_apt is defined) and (upgrade_chroot_apt.stat.exists | bool)
+    - name: Include the chroot upgrade tasks
+      ansible.builtin.include_tasks: chroot_upgrade.yml
+      when: upgrade_chroot_packages_command.stdout_lines | last != "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."
 
   tags:
     - upgrade

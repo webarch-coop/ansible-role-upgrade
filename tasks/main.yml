@@ -29,18 +29,25 @@
         var: upgrade_packages_command
         verbosity: 3
 
-    - name: When upgrade_packages is defined and not empty
+    - name: Include the upgrade tasks
       ansible.builtin.include_tasks: upgrade.yml
       when: upgrade_packages_command.stdout_lines | last != "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded."
 
     - name: Check the existance of the chroot path
       ansible.builtin.stat:
         path: "{{ upgrade_chroot }}"
-      register: upgrade_chroot
+      register: upgrade_chroot_path
+
+    - name: Check that apt-get exists in the chroot
+      ansible.builtin.stat:
+        path: "{{ upgrade_chroot }}/usr/bin/apt-get"
+      register: upgrade_chroot_apt_path
 
     - name: Conditionally include chroot tasks
       ansible.builtin.include_tasks: chroot.yml
-      when: upgrade_chroot.stat.exists | bool
+      when:
+        - upgrade_chroot_path.stat.exists | bool
+        - upgrade_chroot_apt_path.stat.exists | bool
 
   when: upgrade | bool
   tags:
