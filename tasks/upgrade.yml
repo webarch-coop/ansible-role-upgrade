@@ -3,10 +3,10 @@
   block:
 
     # TODO replace this with something more elegant
-    - name: Check for updates and new packages using apt-get -fq dist-upgrade -sq
+    - name: Check for updates and new packages using apt-get -fqqs dist-upgrade
       ansible.builtin.shell: |
         set -e -o pipefail
-        apt-get -fq dist-upgrade -sq | grep ^Inst | awk '{ print $2 }' | xargs
+        apt-get -fqqs dist-upgrade | grep ^Inst | awk '{ print $2 }' | xargs
       args:
         executable: "{{ ansible_local.bash.path }}"
       environment:
@@ -14,6 +14,14 @@
       check_mode: false
       changed_when: false
       register: upgrade_packages
+
+    # - name: Set a fact for a list of the upgradable packages
+    #   ansible.builtin.set_fact:
+    #     upgrade_pkgs: "{{ upgrade_pkgs | default([]) + [ upgrade_pkg.split(' ')[1] ] }}" 
+    #   when: upgrade_pkg is regex('^Inst')
+    #   loop: "{{ upgrade_packages_command.stdout_lines }}"
+    #   loop_control:
+    #     loop_var: upgrade_pkg
 
     - name: Upgrade packages
       block:
