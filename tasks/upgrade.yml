@@ -4,7 +4,7 @@
 
     - name: Set a fact for a list of the upgradable packages
       ansible.builtin.set_fact:
-        upgrade_pkgs: "{{ upgrade_pkgs | default([]) + [ upgrade_pkg.split(' ')[1] ] }}" 
+        upgrade_pkgs: "{{ upgrade_pkgs | default([]) + [upgrade_pkg.split(' ')[1]] }}"
       when: upgrade_pkg is regex('^Inst')
       loop: "{{ upgrade_packages_command.stdout_lines }}"
       loop_control:
