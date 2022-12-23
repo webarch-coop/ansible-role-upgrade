@@ -13,4 +13,8 @@ argument_specs:
         type: str
         required: false
         description: A path to a chroot that should be upgraded.
+      upgrade_reboot:
+        type: bool
+        required: false
+        description: Reboot when required.
 ...

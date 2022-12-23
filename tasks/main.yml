@@ -32,12 +32,17 @@
       ansible.builtin.stat:
         path: "{{ upgrade_chroot }}/usr/bin/apt-get"
       register: upgrade_chroot_apt_path
+      when: upgrade_chroot_path.stat.exists | bool
 
     - name: Conditionally include chroot tasks
       ansible.builtin.include_tasks: chroot.yml
+      when: upgrade_chroot_apt_path.stat.exists | bool
+
+    - name: Include the reboot tasks
+      ansible.builtin.include_tasks: reboot.yml
       when:
-        - upgrade_chroot_path.stat.exists | bool
-        - upgrade_chroot_apt_path.stat.exists | bool
+        - upgrade_reboot is defined
+        - upgrade_reboot | bool
 
   when: upgrade | bool
   tags:
