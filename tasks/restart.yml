@@ -1,0 +1,31 @@
+---
+- name: Restart services
+  block:
+
+    - name: Run needrestart
+      ansible.builtin.command: needrestart -bqr a
+      environment:
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
+      check_mode: false
+      changed_when: false
+      register: upgrade_needrestart_command
+
+    - name: Set a fact for the list of services that need restarting
+      ansible.builtin.set_fact:
+        upgrade_restart: "{{ upgrade_restart | default([]) + [upgrade_needrestart_line.split[1]] }}"
+      when: upgrade_needrestart_line is regex('^NEEDRESTART-SVC')
+      loop: "{{ upgrade_needrestart_command.stdout_lines }}"
+      loop_control:
+        var: upgrade_needrestart_line
+
+    - name: Debug the services that need restarting
+      ansible.builtin.debug:
+        var: upgrade_restart
+        verbosity: 2
+      when:
+        - upgrade_restart is defined
+        - upgrade_restart != []
+
+  tags:
+    - upgrade
+...

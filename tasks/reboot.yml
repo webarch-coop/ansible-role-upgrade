@@ -2,54 +2,38 @@
 - name: Reboot
   block:
 
-    - name: Package needrestart present
-      ansible.builtin.apt:
-        pkg:
-          - needrestart
-        state: present
+    - name: Run needrestart
+      ansible.builtin.command: needrestart -bqr a
+      environment:
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
+      check_mode: false
+      changed_when: false
+      register: upgrade_needrestart_command
 
-    - name: Check if /usr/sbin/needrestart is present
-      ansible.builtin.stat:
-        path: /usr/sbin/needrestart
-      register: upgrade_needrestart_bin
+    - name: Set a fact for the results of needrestart -bqr a
+      ansible.builtin.set_fact:
+        upgrade_needrestart: "{{ upgrade_needrestart_command.stdout | community.general.jc('ini') }}"
 
-    - name: Check needrestart and reboot
+    - name: Debug the results of needrestart
+      ansible.builtin.debug:
+        var: upgrade_needrestart
+        verbosity: 2
+
+    - name: Rebooting
       block:
 
-        - name: Run needrestart
-          ansible.builtin.command: needrestart -bqr a
-          environment:
-            PATH: /usr/sbin:/usr/bin:/sbin:/bin
-          check_mode: false
-          changed_when: false
-          register: upgrade_needrestart_command
-
-        - name: Set a fact for the results of needrestart -bqr a
-          ansible.builtin.set_fact:
-            upgrade_needrestart: "{{ upgrade_needrestart_command.stdout | community.general.jc('ini') }}"
-
-        - name: Debug the results of needrestart
-          ansible.builtin.debug:
-            var: upgrade_needrestart
-            verbosity: 2
-
         - name: Rebooting
-          block:
+          ansible.builtin.debug:
+            msg:
+              - "{{ upgrade_needrestart['NEEDRESTART-KCUR'] }} is the current running kernel"
+              - "{{ upgrade_needrestart['NEEDRESTART-KEXP'] }} is the expected kernel, rebooting"
 
-            - name: Rebooting
-              ansible.builtin.debug:
-                msg: 
-                  - "{{ upgrade_needrestart['NEEDRESTART-KCUR'] }} is the current running kernel"
-                  - "{{ upgrade_needrestart['NEEDRESTART-KEXP'] }} is the expected kernel, rebooting"
+        - name: Reboot when NEEDRESTART-KSTA is 3
+          ansible.builtin.reboot:
 
-            - name: Reboot when NEEDRESTART-KSTA is 3
-              ansible.builtin.reboot:
-
-          when:
-            - upgrade_needrestart['NEEDRESTART-KSTA'] is defined
-            - upgrade_needrestart['NEEDRESTART-KSTA'] == "3"
-
-      when: upgrade_needrestart_bin.stat.exists | bool
+      when:
+        - upgrade_needrestart['NEEDRESTART-KSTA'] is defined
+        - upgrade_needrestart['NEEDRESTART-KSTA'] == "3"
 
   tags:
     - upgrade

@@ -22,7 +22,7 @@
           args:
             chdir: /etc/munin/plugins
           environment:
-            PATH: /bin:/sbin:/usr/bin:/usr/sbin
+            PATH: /usr/sbin:/usr/bin:/sbin:/bin
           register: upgrade_munin_run_apt_all
           check_mode: false
           changed_when: false

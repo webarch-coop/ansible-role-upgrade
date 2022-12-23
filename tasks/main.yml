@@ -2,6 +2,12 @@
 - name: Update and upgrade Debian
   block:
 
+    - name: Packages present
+      ansible.builtin.apt:
+        pkg:
+          - needrestart
+        state: present
+
     - name: Update the apt cache
       ansible.builtin.apt:
         update_cache: true
@@ -14,7 +20,7 @@
       ansible.builtin.command: apt-get -fqqs dist-upgrade
       environment:
         DEBIAN_FRONTEND: noninteractive
-        PATH: /bin:/sbin:/usr/bin:/usr/sbin
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
       check_mode: false
       changed_when: false
       register: upgrade_packages_command
@@ -42,11 +48,23 @@
 
       when: upgrade_chroot_path.stat.exists | bool
 
-    - name: Include the reboot tasks
-      ansible.builtin.include_tasks: reboot.yml
-      when:
-        - upgrade_reboot is defined
-        - upgrade_reboot | bool
+    - name: Check if /usr/sbin/needrestart is present
+      ansible.builtin.stat:
+        path: /usr/sbin/needrestart
+      register: upgrade_needrestart_bin
+
+    - name: Restart services and reboot
+      block:
+
+        - name: Include the restart tasks
+          ansible.builtin.include_tasks: restart.yml
+          when: not upgrade_reboot | bool
+
+        - name: Include the reboot tasks
+          ansible.builtin.include_tasks: reboot.yml
+          when: upgrade_reboot | bool
+
+      when: upgrade_needrestart_bin.stat.exists | bool
 
   when: upgrade | bool
   tags:

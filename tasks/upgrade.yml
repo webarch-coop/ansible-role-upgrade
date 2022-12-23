@@ -27,7 +27,7 @@
             dpkg_options: force-confdef,force-confold
           environment:
             DEBIAN_FRONTEND: noninteractive
-            PATH: /bin:/sbin:/usr/bin:/usr/sbin
+            PATH: /usr/sbin:/usr/bin:/sbin:/bin
           register: upgrade_dist_upgrade
 
         # The logchange script is in the https://git.coop/webarch/scripts repo
