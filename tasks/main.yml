@@ -28,15 +28,19 @@
         path: "{{ upgrade_chroot }}"
       register: upgrade_chroot_path
 
-    - name: Check that apt-get exists in the chroot
-      ansible.builtin.stat:
-        path: "{{ upgrade_chroot }}/usr/bin/apt-get"
-      register: upgrade_chroot_apt_path
-      when: upgrade_chroot_path.stat.exists | bool
+    - name: Chroot tasks
+      block:
 
-    - name: Conditionally include chroot tasks
-      ansible.builtin.include_tasks: chroot.yml
-      when: upgrade_chroot_apt_path.stat.exists | bool
+        - name: Check that apt-get exists in the chroot
+          ansible.builtin.stat:
+            path: "{{ upgrade_chroot }}/usr/bin/apt-get"
+          register: upgrade_chroot_apt_path
+
+        - name: Conditionally include chroot tasks
+          ansible.builtin.include_tasks: chroot.yml
+          when: upgrade_chroot_apt_path.stat.exists | bool
+
+      when: upgrade_chroot_path.stat.exists | bool
 
     - name: Include the reboot tasks
       ansible.builtin.include_tasks: reboot.yml
