@@ -12,7 +12,7 @@
 
     - name: Set a fact for the list of services that need restarting
       ansible.builtin.set_fact:
-        upgrade_restart: "{{ upgrade_restart | default([]) + [upgrade_needrestart_line | split[1]] }}"
+        upgrade_restart: "{{ upgrade_restart | default([]) + [(upgrade_needrestart_line|split[1])] }}"
       when: upgrade_needrestart_line is regex('^NEEDRESTART-SVC')
       loop: "{{ upgrade_needrestart_command.stdout_lines }}"
       loop_control:
