@@ -16,7 +16,7 @@
       when: upgrade_needrestart_line is regex('^NEEDRESTART-SVC')
       loop: "{{ upgrade_needrestart_command.stdout_lines }}"
       loop_control:
-        var: upgrade_needrestart_line
+        loop_var: upgrade_needrestart_line
 
     - name: Debug the services that need restarting
       ansible.builtin.debug:
