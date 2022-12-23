@@ -18,6 +18,8 @@
 
         - name: Run needrestart
           ansible.builtin.command: needrestart -bqr a
+          environment:
+            PATH: /usr/sbin:/usr/bin:/sbin:/bin
           check_mode: false
           changed_when: false
           register: upgrade_needrestart_command
