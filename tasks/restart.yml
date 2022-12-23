@@ -28,7 +28,7 @@
 
     - name: Restart services
       ansible.builtin.service:
-        name: "{{ upgrade_needrestart_service.split[1] }}"
+        name: "{{ upgrade_needrestart_service | regex_replace('^NEEDRESTART-SVC: ') }}"
         start: restarted
       loop: "{{ upgrade_restart }}"
       loop_control:
