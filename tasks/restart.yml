@@ -33,6 +33,7 @@
       loop: "{{ upgrade_restart }}"
       loop_control:
         loop_var: upgrade_needrestart_service
+        label: "{{ upgrade_needrestart_service | regex_replace('^NEEDRESTART-SVC: ') }}"
 
   tags:
     - upgrade
