@@ -36,7 +36,11 @@
 
             - name: The server is to be rebooted
               ansible.builtin.debug:
-                msg: "The server is being rebooted now"
+                msg: 
+                  - "The server is being rebooted because the current kernel is"
+                  - "{{ upgrade_needrestart['NEEDRESTART-KCUR'] }}"
+                  - "and the expected kernel is"
+                  - "{{ upgrade_needrestart['NEEDRESTART-KEXP'] }}"
 
             - name: Reboot when NEEDRESTART-KSTA is 3
               ansible.builtin.reboot:
