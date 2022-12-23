@@ -34,10 +34,10 @@
         - name: Rebooting
           block:
 
-            - name: The server is to be rebooted
+            - name: The server being rebooted
               ansible.builtin.debug:
                 msg: 
-                  - "The server is being rebooted because the current kernel is"
+                  - "The server is being rebooted right now because the current kernel is"
                   - "{{ upgrade_needrestart['NEEDRESTART-KCUR'] }}"
                   - "and the expected kernel is"
                   - "{{ upgrade_needrestart['NEEDRESTART-KEXP'] }}"
