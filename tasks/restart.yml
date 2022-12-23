@@ -26,6 +26,14 @@
         - upgrade_restart is defined
         - upgrade_restart != []
 
+    - name: Restart services
+      ansible.builtin.service:
+        name: "{{ upgrade_needrestart_service.spilt[1] }}"
+        start: restarted
+      loop: "{{ upgrade_restart }}"
+      loop_control:
+        loop_var: upgrade_needrestart_service
+
   tags:
     - upgrade
 ...
