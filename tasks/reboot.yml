@@ -3,14 +3,14 @@
   block:
 
     - name: Run needrestart
-      ansible.builtin.command: needrestart -bqr a
+      ansible.builtin.command: needrestart -b
       environment:
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
       check_mode: false
       changed_when: false
       register: upgrade_needrestart_command
 
-    - name: Set a fact for the results of needrestart -bqr a
+    - name: Set a fact for the results of needrestart -b
       ansible.builtin.set_fact:
         upgrade_needrestart: "{{ upgrade_needrestart_command.stdout | community.general.jc('ini') }}"
 
