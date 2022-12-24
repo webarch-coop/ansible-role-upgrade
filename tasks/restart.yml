@@ -10,9 +10,9 @@
       changed_when: false
       register: upgrade_needrestart_command
 
-    - name: Restart systemd services  # noqa jinja[spacing] Jinja2 spacing could be improved
+    - name: Restart systemd services
       ansible.builtin.systemd_service:
-        name: "{{ upgrade_restart_services | default([]) + [upgrade_needrestart_line|regex_replace('^NEEDRESTART-SVC: ')|regex_replace('.service$')] }}"
+        name: "{{ upgrade_needrestart_line | regex_replace('^NEEDRESTART-SVC: ') | regex_replace('.service$') }}"
         state: restarted
       when:
         - upgrade_needrestart_line is regex('^NEEDRESTART-SVC')
