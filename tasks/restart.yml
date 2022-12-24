@@ -10,6 +10,10 @@
       changed_when: false
       register: upgrade_needrestart_command
 
+    - name: Set a fact for the results of needrestart -bqr a
+      ansible.builtin.set_fact:
+        upgrade_needrestart: "{{ upgrade_needrestart_command.stdout | community.general.jc('ini') }}"
+
     - name: Systemd daemon-reexec
       ansible.builtin.systemd:
         daemon_reexec: true
@@ -31,6 +35,15 @@
       loop: "{{ upgrade_needrestart_command.stdout_lines }}"
       loop_control:
         loop_var: upgrade_needrestart_line
+
+    - name: A reboot is required
+      ansible.builtin.debug:
+        msg:
+          - "{{ upgrade_needrestart['NEEDRESTART-KCUR'] }} is the current running kernel"
+          - "{{ upgrade_needrestart['NEEDRESTART-KEXP'] }} is the expected kernel"
+      when:
+        - upgrade_needrestart['NEEDRESTART-KSTA'] is defined
+        - upgrade_needrestart['NEEDRESTART-KSTA'] == "3"
 
   tags:
     - upgrade
