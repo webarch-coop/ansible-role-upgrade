@@ -23,7 +23,7 @@
     - name: Debug the services that need restarting
       ansible.builtin.debug:
         var: upgrade_restart_services
-        verbosity: 2
+        # verbosity: 2
       when:
         - upgrade_restart_services is defined
         - upgrade_restart_services != []
