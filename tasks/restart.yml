@@ -13,7 +13,10 @@
     - name: Systemd daemon-reexec
       ansible.builtin.systemd:
         daemon_reexec: true
-      when: ( "systemd-manager" in upgrade_needrestart_command.stdout )
+      when: upgrade_needrestart_line == "NEEDRESTART-SVC: systemd-manager"
+      loop: "{{ upgrade_needrestart_command.stdout_lines }}"
+      loop_control:
+        loop_var: upgrade_needrestart_line
 
     - name: Restart systemd services
       ansible.builtin.systemd:
