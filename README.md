@@ -20,6 +20,10 @@ A path to a chroot that should be upgraded, if the path doesn't exist these task
 
 A boolean, reboot the server when the `NEEDRESTART-KSTA` variable returned from `needrestart -bqr a` is `"3"` and `upgrade_reboot` is `true`, it defaults to `false`.
 
+### upgrade_restart
+
+A boolean, restart systemd services when then are listed by `needrestart -bqr a`, `upgrade_restart` defaults to `true`, set it to `false` to skip restarting services.
+
 ## Repository
 
 The primary URL of this repo is [`https://git.coop/webarch/upgrade`](https://git.coop/webarch/upgrade) however it is also [mirrored to GitHub](https://github.com/webarch-coop/ansible-role-upgrade) and [available via Ansible Galaxy](https://galaxy.ansible.com/chriscroome/upgrade).

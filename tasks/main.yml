@@ -58,7 +58,9 @@
 
         - name: Include the restart tasks
           ansible.builtin.include_tasks: restart.yml
-          when: not upgrade_reboot | bool
+          when:
+            - not upgrade_reboot | bool
+            - upgrade_restart | bool
 
         - name: Include the reboot tasks
           ansible.builtin.include_tasks: reboot.yml

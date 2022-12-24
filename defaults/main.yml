@@ -2,4 +2,5 @@
 upgrade: true
 upgrade_chroot: /chroot
 upgrade_reboot: false
+upgrade_restart: true
 ...

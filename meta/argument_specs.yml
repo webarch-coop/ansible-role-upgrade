@@ -17,4 +17,8 @@ argument_specs:
         type: bool
         required: false
         description: Reboot when required.
+      upgrade_restart:
+        type: bool
+        required: false
+        description: Restart services when required.
 ...
