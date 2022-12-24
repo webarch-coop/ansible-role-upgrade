@@ -10,9 +10,9 @@
       changed_when: false
       register: upgrade_needrestart_command
 
-    - name: Set a fact for the list of services that need restarting
+    - name: Set a fact for the needrestart list of services that need restarting
       ansible.builtin.set_fact:
-        upgrade_restart: "{{ upgrade_restart | default([]) + [upgrade_needrestart_line] }}"
+        upgrade_restart_services: "{{ upgrade_restart_services | default([]) + [upgrade_needrestart_line|regex_replace('^NEEDRESTART-SVC: ')|regex_replace('\\.service$')] }}"
       when: upgrade_needrestart_line is regex('^NEEDRESTART-SVC')
       loop: "{{ upgrade_needrestart_command.stdout_lines }}"
       loop_control:
@@ -20,7 +20,7 @@
 
     - name: Debug the services that need restarting
       ansible.builtin.debug:
-        var: upgrade_restart
+        var: upgrade_restart_services
         verbosity: 2
       when:
         - upgrade_restart is defined
@@ -28,12 +28,11 @@
 
     - name: Restart services
       ansible.builtin.service:
-        name: "{{ upgrade_needrestart_service | regex_replace('^NEEDRESTART-SVC: ') }}"
+        name: "{{ upgrade_restart_service }}"
         start: restarted
-      loop: "{{ upgrade_restart }}"
+      loop: "{{ upgrade_restart_services }}"
       loop_control:
-        loop_var: upgrade_needrestart_service
-        label: "{{ upgrade_needrestart_service | regex_replace('^NEEDRESTART-SVC: ') }}"
+        loop_var: upgrade_restart_service
 
   tags:
     - upgrade
