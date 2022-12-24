@@ -67,7 +67,7 @@
           when:
             - not upgrade_reboot | bool
             - upgrade_restart | bool
-            - locale_init.stdout == "systemd"
+            - upgrade_init.stdout == "systemd"
 
         - name: Include the reboot tasks
           ansible.builtin.include_tasks: reboot.yml
