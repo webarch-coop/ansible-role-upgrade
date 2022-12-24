@@ -23,8 +23,8 @@
         var: upgrade_restart_services
         verbosity: 2
       when:
-        - upgrade_restart is defined
-        - upgrade_restart != []
+        - upgrade_restart_services is defined
+        - upgrade_restart_services != []
 
     - name: Restart systemd services
       ansible.builtin.systemd_service:
