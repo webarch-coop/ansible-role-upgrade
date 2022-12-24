@@ -18,11 +18,11 @@ A path to a chroot that should be upgraded, if the path doesn't exist these task
 
 ### upgrade_reboot
 
-A boolean, reboot the server when the `NEEDRESTART-KSTA` variable returned from `needrestart -bqr a` is `"3"` and `upgrade_reboot` is `true`, it defaults to `false`.
+A boolean, reboot the server when the `NEEDRESTART-KSTA` variable returned from `needrestart -b` is `"3"` and `upgrade_reboot` is `true`, it defaults to `false`.
 
 ### upgrade_restart
 
-A boolean, restart systemd services when then are listed by `needrestart -bqr a`, `upgrade_restart` defaults to `true`, set it to `false` to skip restarting services.
+A boolean, restart systemd services when then are listed by `needrestart -b`, `upgrade_restart` defaults to `true`, set it to `false` to skip restarting services.
 
 ## Repository
 
