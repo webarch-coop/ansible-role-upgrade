@@ -10,13 +10,18 @@
       changed_when: false
       register: upgrade_needrestart_command
 
+    - name: Systemd daemon-reexec
+      ansible.builtin.systemd:
+        daemon_reexec: true
+      when: ( "NEEDRESTART-SVC: systemd-manager" in upgrade_needrestart_command.stdout )
+
     - name: Restart systemd services
-      ansible.builtin.systemd_service:
-        name: "{{ upgrade_needrestart_line | regex_replace('^NEEDRESTART-SVC: ') | regex_replace('.service$') }}"
+      ansible.builtin.systemd:
+        name: "{{ upgrade_needrestart_line | regex_replace('^NEEDRESTART-SVC: ') }}"
         state: restarted
       when:
         - upgrade_needrestart_line is regex('^NEEDRESTART-SVC')
-        - upgrade_needrestart_line is regex('service$')
+        - upgrade_needrestart_line is regex('[.]service$')
       loop: "{{ upgrade_needrestart_command.stdout_lines }}"
       loop_control:
         loop_var: upgrade_needrestart_line
