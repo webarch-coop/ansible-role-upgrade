@@ -13,6 +13,7 @@
     - name: Systemd daemon-reexec
       ansible.builtin.systemd:
         daemon_reexec: true
+        daemon_reload: true
       when:
         - upgrade_needrestart_line is regex('^NEEDRESTART-SVC[:]')
         - upgrade_needrestart_line is regex(' systemd-manager$')
