@@ -2,48 +2,28 @@
 - name: Restart services
   block:
 
-    - name: Run needrestart
-      ansible.builtin.command: needrestart -b
-      environment:
-        PATH: /usr/sbin:/usr/bin:/sbin:/bin
-      check_mode: false
-      changed_when: false
-      register: upgrade_needrestart_command
-
-    - name: Set a fact for the results of needrestart -b
-      ansible.builtin.set_fact:
-        upgrade_needrestart: "{{ upgrade_needrestart_command.stdout | community.general.jc('ini') }}"
-
     - name: Systemd daemon-reexec
       ansible.builtin.systemd:
         daemon_reexec: true
         daemon_reload: true
-      when:
-        - upgrade_needrestart_line is regex('^NEEDRESTART-SVC[:]')
-        - upgrade_needrestart_line is regex(' systemd-manager$')
-      loop: "{{ upgrade_needrestart_command.stdout_lines }}"
-      loop_control:
-        loop_var: upgrade_needrestart_line
+      when: upgrade_systemd_daemon_reexec | bool
 
     - name: Restart systemd services
       ansible.builtin.systemd:
-        name: "{{ upgrade_needrestart_line | regex_replace('^NEEDRESTART-SVC: ') }}"
+        name: "{{ upgrade_service }}"
         state: restarted
-      when:
-        - upgrade_needrestart_line is regex('^NEEDRESTART-SVC')
-        - upgrade_needrestart_line is regex('[.]service$')
-      loop: "{{ upgrade_needrestart_command.stdout_lines }}"
+      loop: "{{ upgrade_services }}"
       loop_control:
-        loop_var: upgrade_needrestart_line
+        loop_var: upgrade_service
 
     - name: A reboot is required
       ansible.builtin.debug:
         msg:
-          - "{{ upgrade_needrestart['NEEDRESTART-KCUR'] }} is the current running kernel"
-          - "{{ upgrade_needrestart['NEEDRESTART-KEXP'] }} is the expected kernel"
+          - "{{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }} is the current running kernel"
+          - "{{ upgrade_needrestart_yaml['NEEDRESTART-KEXP'] }} is the expected kernel"
       when:
-        - upgrade_needrestart['NEEDRESTART-KSTA'] is defined
-        - upgrade_needrestart['NEEDRESTART-KSTA'] == "3"
+        - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined
+        - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3"
 
   tags:
     - upgrade
