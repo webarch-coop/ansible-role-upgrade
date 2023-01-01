@@ -75,12 +75,26 @@
           check_mode: false
           register: upgrade_init
 
+        - name: Run needrestart
+          ansible.builtin.command: needrestart -b
+          check_mode: false
+          changed_when: false
+          register: upgrade_needrestart_cmd
+
+        - name: Set facts for needrestart, services that need restarting and systemd daemon-reexec
+          ansible.builtin.set_fact:
+            # Note that the JC ini parser results in a max of one service being listed see https://github.com/kellyjonbrazil/jc/issues/339
+            upgrade_needrestart_yaml: "{{ upgrade_needrestart_cmd.stdout | community.general.jc('ini') }}"
+            upgrade_services: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', '[.]service$') | map('regex_replace', '^NEEDRESTART-SVC: ') }}"
+            upgrade_systemd_daemon_reexec: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') | map('regex_replace', '^NEEDRESTART-SVC: ') | bool }}"
+
         - name: Include the restart tasks
           ansible.builtin.include_tasks: restart.yml
           when:
             - not upgrade_reboot | bool
             - upgrade_restart | bool
             - upgrade_init.stdout == "systemd"
+            - ( upgrade_services != [] ) or ( upgrade_systemd_daemon_reexec | bool )
 
         - name: Include the reboot tasks
           ansible.builtin.include_tasks: reboot.yml
