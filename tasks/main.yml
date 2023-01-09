@@ -71,12 +71,16 @@
 
         - name: Check if system has been booted with systemd as init system
           ansible.builtin.command: ps -p 1 -o comm=
+          environment:
+            PATH: /usr/sbin:/usr/bin:/sbin:/bin
           changed_when: false
           check_mode: false
           register: upgrade_init
 
         - name: Run needrestart
-          ansible.builtin.command: needrestart -b
+          ansible.builtin.command: /usr/sbin/needrestart -b
+          environment:
+            PATH: /usr/sbin:/usr/bin:/sbin:/bin
           check_mode: false
           changed_when: false
           register: upgrade_needrestart_cmd

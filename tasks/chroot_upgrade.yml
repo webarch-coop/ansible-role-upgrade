@@ -6,23 +6,27 @@
       ansible.builtin.command: >-
         chroot {{ upgrade_chroot }} apt-get -fyqo Dpkg::Options::='--force-confdef' dist-upgrade
       environment:
-        DEBIAN_FRONTEND: noninteractive
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
       register: upgrade_chroot_apt_get_dist_upgrade
       changed_when: ( "The following packages will be upgraded" in upgrade_chroot_apt_get_dist_upgrade.stdout )
 
     - name: Apt autoremove in the chroot  # noqa yaml[comments] command-instead-of-module
       ansible.builtin.command: "chroot {{ upgrade_chroot }} apt autoremove -yfq"
       environment:
-        DEBIAN_FRONTEND: noninteractive
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
       changed_when: false
       register: upgrade_chroot_apt_autoremove
 
     - name: Remove set GID from files  # noqa yaml[comments] command-instead-of-module
       ansible.builtin.shell: "for i in $( find {{ upgrade_chroot }} -perm -2000 ); do chmod g-s $i; done"
+      environment:
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
       changed_when: false
 
     - name: Remove set UID from files  # noqa yaml[comments] command-instead-of-module
       ansible.builtin.shell: "for i in $( find {{ upgrade_chroot }} -perm -4000 ); do chmod u-s $i; done"
+      environment:
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
       changed_when: false
 
   tags:

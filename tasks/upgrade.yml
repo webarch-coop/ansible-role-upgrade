@@ -25,8 +25,13 @@
       register: upgrade_logchange
 
     - name: Update the Changelog
-      ansible.builtin.command: "logchange '{{ upgrade_pkgs | join | ansible.builtin.quote }} : updated'"
-      when: upgrade_logchange.stat.exists | bool
+      ansible.builtin.command: "/usr/local/bin/logchange '{{ upgrade_pkgs | join | ansible.builtin.quote }} : updated'"
+      environment:
+        PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      when:
+        - upgrade_pkgs is defined
+        - upgrade_pkgs != []
+        - upgrade_logchange.stat.exists | bool
 
     - name: Restart Docker if it has been updated
       ansible.builtin.service:

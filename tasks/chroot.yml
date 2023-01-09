@@ -5,7 +5,7 @@
     - name: Update package lists in the chroot  # noqa yaml[comments] command-instead-of-module
       ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -qq update"
       environment:
-        DEBIAN_FRONTEND: noninteractive
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
       check_mode: false
       changed_when: false
       register: upgrade_chroot_apt_get_update
@@ -13,7 +13,7 @@
     - name: Check for updates in the chroot using apt-get -fqqs dist-upgrade  # noqa yaml[comments] command-instead-of-module
       ansible.builtin.command: "chroot {{ upgrade_chroot }} apt-get -fqqs dist-upgrade"
       environment:
-        DEBIAN_FRONTEND: noninteractive
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
       check_mode: false
       changed_when: false
       register: upgrade_chroot_packages_command
