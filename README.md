@@ -22,7 +22,11 @@ A boolean, reboot the server when the `NEEDRESTART-KSTA` variable returned from 
 
 ### upgrade_restart
 
-A boolean, restart systemd services when then are listed by `needrestart -b`, `upgrade_restart` defaults to `true`, set it to `false` to skip restarting services.
+A boolean, restart systemd services when then are listed by `needrestart -b`, `upgrade_restart` defaults to `true`, set it to `false` to totally skip restarting services.
+
+### upgrade_restart_skip
+
+A optional list of names of services that should not be restated, by default `upgrade_restart_skip` is a list containing only one service, `dbus.service`. 
 
 ## Repository
 

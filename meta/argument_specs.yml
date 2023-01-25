@@ -21,4 +21,9 @@ argument_specs:
         type: bool
         required: false
         description: Restart services when required.
+      upgrade_restart_skip:
+        type: list
+        elements: str
+        required: false
+        description: A list of services that should not be restarted.
 ...
