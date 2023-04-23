@@ -75,34 +75,55 @@
             PATH: /usr/sbin:/usr/bin:/sbin:/bin
           changed_when: false
           check_mode: false
-          register: upgrade_init
+          register: upgrade_ps
+          failed_when: upgrade_ps.rc is not regex('^0|47$')
 
-        - name: Run needrestart
-          ansible.builtin.command: /usr/sbin/needrestart -b
-          environment:
-            PATH: /usr/sbin:/usr/bin:/sbin:/bin
-          check_mode: false
-          changed_when: false
-          register: upgrade_needrestart_cmd
-
-        - name: Set facts for needrestart, services that need restarting and systemd daemon-reexec
+        - name: Set a fact for the init system
           ansible.builtin.set_fact:
-            # Note that the JC ini parser results in a max of one service being listed see https://github.com/kellyjonbrazil/jc/issues/339
-            upgrade_needrestart_yaml: "{{ upgrade_needrestart_cmd.stdout | community.general.jc('ini') }}"
-            upgrade_services: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', '[.]service$') | map('regex_replace', '^NEEDRESTART-SVC: ') }}"
-            upgrade_systemd_daemon_reexec: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') | map('regex_replace', '^NEEDRESTART-SVC: ') | bool }}"
+            upgrade_init: "{{ upgrade_ps.stdout }}"
+          when: upgrade_ps.rc == 0
 
-        - name: Include the restart tasks
-          ansible.builtin.include_tasks: restart.yml
-          when:
-            - not upgrade_reboot | bool
-            - upgrade_restart | bool
-            - upgrade_init.stdout == "systemd"
-            - ( upgrade_services != [] ) or ( upgrade_systemd_daemon_reexec | bool )
+        - name: When the exit code is 47 assume is is because this is a chroot
+          ansible.builtin.set_fact:
+            upgrade_init: chroot
+          when: upgrade_ps.rc == 47
 
-        - name: Include the reboot tasks
-          ansible.builtin.include_tasks: reboot.yml
-          when: upgrade_reboot | bool
+        - name: Debug the ini system
+          ansible.builtin.debug:
+            var: upgrade_init
+            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+
+        - name: Systemd tasks
+          block:
+
+            - name: Run needrestart
+              ansible.builtin.command: /usr/sbin/needrestart -b
+              environment:
+                PATH: /usr/sbin:/usr/bin:/sbin:/bin
+              check_mode: false
+              changed_when: false
+              register: upgrade_needrestart_cmd
+
+            - name: Set facts for needrestart, services that need restarting and systemd daemon-reexec
+              ansible.builtin.set_fact:
+                # Note that the JC ini parser results in a max of one service being listed see https://github.com/kellyjonbrazil/jc/issues/339
+                upgrade_needrestart_yaml: "{{ upgrade_needrestart_cmd.stdout | string | community.general.jc('ini') }}"
+                upgrade_services: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', '[.]service$') | map('regex_replace', '^NEEDRESTART-SVC: ') }}"
+                upgrade_systemd_daemon_reexec: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') | map('regex_replace', '^NEEDRESTART-SVC: ') | bool }}"
+
+            - name: Include the restart tasks
+              ansible.builtin.include_tasks: restart.yml
+              when:
+                - not upgrade_reboot | bool
+                - upgrade_restart | bool
+                - upgrade_init.stdout == "systemd"
+                - ( upgrade_services != [] ) or ( upgrade_systemd_daemon_reexec | bool )
+
+            - name: Include the reboot tasks
+              ansible.builtin.include_tasks: reboot.yml
+              when: upgrade_reboot | bool
+
+          when: upgrade_init == "systemd"
 
       when: upgrade_needrestart_bin.stat.exists | bool
 

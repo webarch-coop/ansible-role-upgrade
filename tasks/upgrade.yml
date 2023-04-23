@@ -28,6 +28,7 @@
       ansible.builtin.command: "/usr/local/bin/logchange '{{ upgrade_pkgs | join | ansible.builtin.quote }} : updated'"
       environment:
         PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+      changed_when: true
       when:
         - upgrade_pkgs is defined
         - upgrade_pkgs != []

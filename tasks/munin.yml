@@ -17,7 +17,7 @@
     - name: Munin tasks
       block:
 
-        - name: Check the Munin apt_all plugin output
+        - name: Check the Munin apt_all plugin output  # noqa: no-handler
           ansible.builtin.command: munin-run apt_all
           args:
             chdir: /etc/munin/plugins
