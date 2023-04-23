@@ -14,17 +14,26 @@
     - name: Set a fact for the init system
       ansible.builtin.set_fact:
         upgrade_init: "{{ upgrade_ps.stdout }}"
-      when: upgrade_ps.rc == 0
+      when:
+        - upgrade_ps.stdout is defined
+        - upgrade_ps.rc == 0
 
     - name: When the exit code is 47 assume is is because this is a chroot
       ansible.builtin.set_fact:
         upgrade_init: chroot
-      when: upgrade_ps.rc == 47
+      when:
+        - upgrade_ps.stdout is defined
+        - upgrade_ps.rc == 47
 
     - name: Debug the ini system
       ansible.builtin.debug:
         var: upgrade_init
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+
+    - name: The init system is not defined
+      ansible.builtin.assert:
+        that:
+          - upgrade_init is defined
 
     - name: Packages present
       ansible.builtin.apt:
@@ -114,7 +123,6 @@
           when:
             - not upgrade_reboot | bool
             - upgrade_restart | bool
-            - upgrade_init.stdout == "systemd"
             - ( upgrade_services != [] ) or ( upgrade_systemd_daemon_reexec | bool )
 
         - name: Include the reboot tasks
@@ -123,6 +131,7 @@
 
       when:
         - upgrade_needrestart_bin.stat.exists | bool
+        - upgrade_init is defined
         - upgrade_init == "systemd"
 
   when: upgrade | bool
