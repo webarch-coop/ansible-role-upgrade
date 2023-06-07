@@ -3,7 +3,16 @@
 # https://github.com/adrienverge/yamllint/tags
 repos:
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.28.0
+    rev: v1.32.0
     hooks:
       - id: yamllint
+        args:
+          - '-c=.yamllint'
+  - repo: https://github.com/ansible/ansible-lint.git
+    rev: v6.17.0
+    hooks:
+      - id: ansible-lint
+        name: Ansible Lint
+        args:
+          - '-c=.ansible-lint'
 ...

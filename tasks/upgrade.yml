@@ -42,6 +42,11 @@
         ( "docker-ce" in upgrade_pkgs ) or
         ( "containerd.io" in upgrade_pkgs )
 
+    - name: Reconfigure OpenProject if it has been updated
+      ansible.builtin.command: openproject configure
+      changed_when: true
+      when: ( "openproject" in upgrade_pkgs )
+
     - name: Check the existance of /etc/munin/plugins/apt_all
       ansible.builtin.stat:
         path: /etc/munin/plugins/apt_all
