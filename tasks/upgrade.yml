@@ -86,7 +86,7 @@
           register: upgrade_changelog_update_path
 
         - name: Append the Changelog update
-          ansible.builtin.shell: cat /root/.Changelog/update >> /root/Changlog
+          ansible.builtin.shell: cat /root/.Changelog/update >> /root/Changelog
           environment:
             PATH: /usr/sbin:/usr/bin:/sbin:/bin
           changed_when: true

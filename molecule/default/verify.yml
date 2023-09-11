@@ -31,16 +31,27 @@
       register: molecule_dist_upgrade
       failed_when: molecule_dist_upgrade.changed | bool
 
-    - name: Slurp a base64 encoded version of the file
-      ansible.builtin.slurp:
-        src: /root/Changelog
-      register: molecule_changelog_b64encoded
+    - name: Check if the Changelog exists
+      ansible.builtin.stat:
+        path: /root/Changlog
+      register: molecule_changelog_path
 
-    - name: Decode the base64 encoded version of the changelog, split it by lines and set an array
-      ansible.builtin.set_fact:
-        molecule_changelog: "{{ ( molecule_changelog_b64encoded['content'] | b64decode | trim ).split('\n') }}"
+    - name: Print /root/Changelog
+      block:
 
-    - name: Print the Changlog contents
-      ansible.builtin.debug:
-        var: molecule_changelog
+        - name: Slurp a base64 encoded version of the file
+          ansible.builtin.slurp:
+            src: /root/Changelog
+          register: molecule_changelog_b64encoded
+
+        - name: Decode the base64 encoded version of the changelog, split it by lines and set an array
+          ansible.builtin.set_fact:
+            molecule_changelog: "{{ ( molecule_changelog_b64encoded['content'] | b64decode | trim ).split('\n') }}"
+
+        - name: Print the Changlog contents
+          ansible.builtin.debug:
+            var: molecule_changelog
+
+      when: molecule_changelog_path.stat.exists
+
 ...
