@@ -47,7 +47,7 @@
         upgrade_changelog_user: root
       when:
         - ansible_effective_user_id == 0
-        - ansible_env.USER not is defined
+        - ansible_env.USER is not defined
         - ansible_env.GITLAB_USER_LOGIN is not defined
         - ansible_env.SUDO_USER is not defined
 

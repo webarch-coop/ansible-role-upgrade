@@ -1,4 +1,4 @@
-# Webarchitects Ansible Debian update and upgrade role 
+# Webarchitects Ansible Debian update and upgrade role
 
 [![pipeline status](https://git.coop/webarch/upgrade/badges/master/pipeline.svg)](https://git.coop/webarch/upgrade/-/commits/master)
 
@@ -26,7 +26,7 @@ A boolean, restart systemd services when then are listed by `needrestart -b`, `u
 
 ### upgrade_restart_skip
 
-A optional list of names of services that should not be restated, by default `upgrade_restart_skip` is a list containing only one service, `dbus.service`. 
+A optional list of names of services that should not be restated, by default `upgrade_restart_skip` is a list containing only one service, `dbus.service`.
 
 ## Repository
 
