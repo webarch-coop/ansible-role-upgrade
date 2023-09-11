@@ -66,7 +66,9 @@
         - name: Gzip the Changelog backup
           ansible.builtin.command: "gzip /root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
           changed_when: true
-          when: upgrade_changelog_backup_path.stat.exists | bool
+          when:
+            - upgrade_changelog_backup_path is defined
+            - upgrade_changelog_backup_path.stat.exists | bool
 
         - name: Write the Changelog update
           ansible.builtin.template:
@@ -84,13 +86,17 @@
         - name: Append the Changelog update
           ansible.builtin.command: cat /root/.Changelog/update >> /root/Changlog
           changed_when: true
-          when: upgrade_changelog_update_path.stat.exists | bool
+          when:
+            - upgrade_changelog_update_path is defined
+            - upgrade_changelog_update_path.stat.exists | bool
 
         - name: Delete the Changelog update
           ansible.builtin.file:
             path: /root/.Changelog/update
             state: absent
-          when: upgrade_changelog_update_path.stat.exists | bool
+          when:
+            - upgrade_changelog_update_path is defined
+            - upgrade_changelog_update_path.stat.exists | bool
 
       when:
         - upgrade_changelog | bool

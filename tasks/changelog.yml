@@ -24,6 +24,11 @@
         upgrade_changelog_date: "{{ ansible_date_time.date }}"
         upgrade_changelog_time: "{{ ansible_date_time.iso8601_micro }}"
 
+    - name: Check if the Changelog exists
+      ansible.builtin.stat:
+        path: /root/Changlog
+      register: upgrade_changelog_path
+
   tags:
     - upgrade
 ...
