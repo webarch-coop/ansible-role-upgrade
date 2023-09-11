@@ -18,6 +18,10 @@
 - name: Update and upgrade Debian
   block:
 
+    - name: Debug ansible_env
+      ansible.builtin.debug:
+        var: ansible_env
+
     - name: This role needs to be run as root
       ansible.builtin.assert:
         that:

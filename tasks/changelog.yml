@@ -23,7 +23,33 @@
       ansible.builtin.set_fact:
         upgrade_changelog_date: "{{ ansible_date_time.date }}"
         upgrade_changelog_time: "{{ ansible_date_time.iso8601_micro }}"
-        upgrade_changelog_user: "{{ ansible_env.SUDO_USER | default(ansible_env.USER) }}"
+
+    - name: Set fact for the user name using GITLAB_USER_LOGIN
+      ansible.builtin.set_fact:
+        upgrade_changelog_user: "{{ ansible_env.GITLAB_USER_LOGIN }}"
+      when: ansible_env.GITLAB_USER_LOGIN is defined
+
+    - name: Set fact for the user name using SUDO_USER
+      ansible.builtin.set_fact:
+        upgrade_changelog_user: "{{ ansible_env.SUDO_USER }}"
+      when: ansible_env.SUDO_USER is defined
+
+    - name: Set fact for the user name using USER
+      ansible.builtin.set_fact:
+        upgrade_changelog_user: "{{ ansible_env.USER }}"
+      when:
+        - ansible_env.USER is defined
+        - ansible_env.GITLAB_USER_LOGIN is not defined
+        - ansible_env.SUDO_USER is not defined
+
+    - name: Set fact for the username to root
+      ansible.builtin.set_fact:
+        upgrade_changelog_user: root
+      when:
+        - ansible_effective_user_id == 0
+        - ansible_env.USER not is defined
+        - ansible_env.GITLAB_USER_LOGIN is not defined
+        - ansible_env.SUDO_USER is not defined
 
     - name: Check if the Changelog exists
       ansible.builtin.stat:
