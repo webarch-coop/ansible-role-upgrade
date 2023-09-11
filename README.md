@@ -12,6 +12,10 @@ See the [defaults/main.yml](defaults/main.yml) file for the default variables an
 
 If `upgrade` is `true` tasks in this role will be run, set it to `false` for servers that should not be upgraded using Ansible, it defaults to `true`.
 
+### upgrade_changelog
+
+When `true` white a `/root/Changelog` with the list of packages installed, it defaults to `true`.
+
 ### upgrade_chroot
 
 A path to a chroot that should be upgraded, if the path doesn't exist these tasks will be skipped, `upgrade_chroot` defaults to `/chroot`.
