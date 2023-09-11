@@ -56,16 +56,17 @@
             mode: "0600"
             owner: root
             group: root
+          when: upgrade_changelog_path.stat.exists
 
         - name: Check that the Changelog backup exists
           ansible.builtin.stat:
             path: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
-          register: upgrade_changelog_backup
+          register: upgrade_changelog_backup_path
 
         - name: Gzip the Changelog backup
           ansible.builtin.command: "gzip /root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
           changed_when: true
-          when: upgrade_changelog_backup.stat.exists | bool
+          when: upgrade_changelog_backup_path.stat.exists | bool
 
         - name: Write the Changelog update
           ansible.builtin.template:
@@ -78,18 +79,18 @@
         - name: Check that the Changelog update exists
           ansible.builtin.stat:
             path: /root/.Changelog/update
-          register: upgrade_changelog_update
+          register: upgrade_changelog_update_path
 
         - name: Append the Changelog update
           ansible.builtin.command: cat /root/.Changelog/update >> /root/Changlog
           changed_when: true
-          when: upgrade_changelog_update.stat.exists | bool
+          when: upgrade_changelog_update_path.stat.exists | bool
 
         - name: Delete the Changelog update
           ansible.builtin.file:
             path: /root/.Changelog/update
             state: absent
-          when: upgrade_changelog_update.stat.exists | bool
+          when: upgrade_changelog_update_path.stat.exists | bool
 
       when:
         - upgrade_changelog | bool
