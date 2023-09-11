@@ -1,6 +1,28 @@
+# Copyright 2018-2023 Chris Croome
+#
+# This file is part of the Webarchitects Upgrade Ansible role.
+#
+# The Webarchitects Upgrade Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Upgrade Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Upgrade Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
+- name: Skip the tasks in this role
+  ansible.builtin.debug:
+    msg: "The Upgrade role tasks are not being run since the upgrade variable is false."
+  when: not upgrade | bool
+  tags:
+    - upgrade
+
 - name: Update and upgrade Debian
   block:
+
+    - name: This role needs to be run as root
+      ansible.builtin.assert:
+        that:
+          - ansible_effective_user_id == 0
+        quiet: true
 
     - name: Check if system has been booted with systemd as init system
       ansible.builtin.command: ps -p 1 -o comm=
@@ -69,6 +91,10 @@
       when:
         - upgrade_apt_check.stdout_lines is defined
         - upgrade_apt_check.stdout_lines != []
+
+    - name: Include the Changelog tasks
+      ansible.builtin.include_tasks: changelog.yml
+      when: upgrade_changelog | bool
 
     - name: Include the upgrade tasks
       ansible.builtin.include_tasks: upgrade.yml

@@ -8,18 +8,22 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Upgrade Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-dependency:
-  name: galaxy
-platforms:
-  - name: instance
-provisioner:
-  name: ansible
-    # host_vars:
-    #   instance:
-    #     ansible_user: ansible
-verifier:
-  name: ansible
-    # host_vars:
-    #   instance:
-    #     ansible_user: ansible
+- name: Changelog tasks
+  block:
+
+    - name: Ensure that a Changelog backup directory is present
+      ansible.builtin.file:
+        path: /root/.Changelog
+        state: directory
+        mode: "0700"
+        owner: root
+        group: root
+
+    - name: Set fact for the date and time
+      ansible.builtin.set_fact:
+        upgrade_changelog_date: "{{ ansible_date_time.date }}"
+        upgrade_changelog_time: "{{ ansible_date_time.iso8601_micro }}"
+
+  tags:
+    - upgrade
 ...

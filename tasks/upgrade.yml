@@ -1,3 +1,12 @@
+# Copyright 2018-2023 Chris Croome
+#
+# This file is part of the Webarchitects Upgrade Ansible role.
+#
+# The Webarchitects Upgrade Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Upgrade Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Upgrade Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
 - name: Upgrade Debian packages
   block:
@@ -19,20 +28,75 @@
       register: upgrade_dist_upgrade
 
     # The logchange script is in the https://git.coop/webarch/scripts repo
-    - name: Check the existance of /usr/local/bin/logchange
-      ansible.builtin.stat:
-        path: /usr/local/bin/logchange
-      register: upgrade_logchange
+    # - name: Check the existance of /usr/local/bin/logchange
+    #   ansible.builtin.stat:
+    #     path: /usr/local/bin/logchange
+    #   register: upgrade_logchange
+
+    # - name: Update the Changelog
+    #   ansible.builtin.command: "/usr/local/bin/logchange '{{ upgrade_logchange_pkgs }} : updated'"
+    #   vars:
+    #     upgrade_logchange_pkgs: "{{ upgrade_pkgs | join(' ') }}"
+    #   environment:
+    #     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    #   changed_when: true
+    #   when:
+    #     - upgrade_pkgs is defined
+    #     - upgrade_pkgs != []
+    #     - upgrade_logchange.stat.exists |
 
     - name: Update the Changelog
-      ansible.builtin.command: "/usr/local/bin/logchange '{{ upgrade_pkgs | join | ansible.builtin.quote }} : updated'"
-      environment:
-        PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-      changed_when: true
+      block:
+
+        - name: Backup the Changelog
+          ansible.builtin.copy:
+            src: /root/Changlog
+            dest: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
+            remote_src: true
+            mode: "0600"
+            owner: root
+            group: root
+
+        - name: Check that the Changelog backup exists
+          ansible.builtin.stat:
+            path: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
+          register: upgrade_changelog_backup
+
+        - name: Gzip the Changelog backup
+          ansible.builtin.command: "gzip /root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
+          changed_when: true
+          when: upgrade_changelog_backup.stat.exists | bool
+
+        - name: Write the Changelog update
+          ansible.builtin.template:
+            src: changelog.j2
+            dest: /root/.Changelog/update
+            mode: "0600"
+            owner: root
+            group: root
+
+        - name: Check that the Changelog update exists
+          ansible.builtin.stat:
+            path: /root/.Changelog/update
+          register: upgrade_changelog_update
+
+        - name: Append the Changelog update
+          ansible.builtin.command: cat /root/.Changelog/update >> /root/Changlog
+          changed_when: true
+          when: upgrade_changelog_update.stat.exists | bool
+
+        - name: Delete the Changelog update
+          ansible.builtin.file:
+            path: /root/.Changelog/update
+            state: absent
+          when: upgrade_changelog_update.stat.exists | bool
+
       when:
+        - upgrade_changelog | bool
+        - upgrade_changelog_date is defined
+        - upgrade_changelog_time is defned
         - upgrade_pkgs is defined
         - upgrade_pkgs != []
-        - upgrade_logchange.stat.exists | bool
 
     - name: Restart Docker if it has been updated
       ansible.builtin.service:
