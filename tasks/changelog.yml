@@ -23,6 +23,7 @@
       ansible.builtin.set_fact:
         upgrade_changelog_date: "{{ ansible_date_time.date }}"
         upgrade_changelog_time: "{{ ansible_date_time.iso8601_micro }}"
+        upgrade_changelog_user: "{{ ansible_env.SUDO_USER | default(ansible_env.USER) }}"
 
     - name: Check if the Changelog exists
       ansible.builtin.stat:
