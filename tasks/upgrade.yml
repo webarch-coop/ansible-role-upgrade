@@ -94,7 +94,7 @@
       when:
         - upgrade_changelog | bool
         - upgrade_changelog_date is defined
-        - upgrade_changelog_time is defned
+        - upgrade_changelog_time is defined
         - upgrade_pkgs is defined
         - upgrade_pkgs != []
 

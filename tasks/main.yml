@@ -57,6 +57,10 @@
         that:
           - upgrade_init is defined
 
+    - name: Include the Changelog tasks
+      ansible.builtin.include_tasks: changelog.yml
+      when: upgrade_changelog | bool
+
     - name: Packages present
       ansible.builtin.apt:
         pkg:
@@ -91,10 +95,6 @@
       when:
         - upgrade_apt_check.stdout_lines is defined
         - upgrade_apt_check.stdout_lines != []
-
-    - name: Include the Changelog tasks
-      ansible.builtin.include_tasks: changelog.yml
-      when: upgrade_changelog | bool
 
     - name: Include the upgrade tasks
       ansible.builtin.include_tasks: upgrade.yml
