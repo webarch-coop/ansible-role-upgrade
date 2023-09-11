@@ -33,7 +33,7 @@
 
     - name: Check if the Changelog exists
       ansible.builtin.stat:
-        path: /root/Changlog
+        path: /root/Changelog
       register: molecule_changelog_path
 
     - name: Print /root/Changelog
@@ -48,7 +48,7 @@
           ansible.builtin.set_fact:
             molecule_changelog: "{{ ( molecule_changelog_b64encoded['content'] | b64decode | trim ).split('\n') }}"
 
-        - name: Print the Changlog contents
+        - name: Print the Changelog contents
           ansible.builtin.debug:
             var: molecule_changelog
 

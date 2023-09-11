@@ -53,7 +53,7 @@
 
     - name: Check if the Changelog exists
       ansible.builtin.stat:
-        path: /root/Changlog
+        path: /root/Changelog
       register: upgrade_changelog_path
 
   tags:
