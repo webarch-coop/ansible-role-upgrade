@@ -65,6 +65,8 @@
 
         - name: Gzip the Changelog backup
           ansible.builtin.command: "gzip /root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
+          environment:
+            PATH: /usr/sbin:/usr/bin:/sbin:/bin
           changed_when: true
           when:
             - upgrade_changelog_backup_path is defined
@@ -84,7 +86,9 @@
           register: upgrade_changelog_update_path
 
         - name: Append the Changelog update
-          ansible.builtin.command: cat /root/.Changelog/update >> /root/Changlog
+          ansible.builtin.shell: cat /root/.Changelog/update >> /root/Changlog
+          environment:
+            PATH: /usr/sbin:/usr/bin:/sbin:/bin
           changed_when: true
           when:
             - upgrade_changelog_update_path is defined
