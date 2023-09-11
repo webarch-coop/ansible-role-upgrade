@@ -30,10 +30,6 @@
       ansible.builtin.debug:
         var: ansible_user_dir
 
-    - name: Debug ansible_env
-      ansible.builtin.debug:
-        var: ansible_env
-
     - name: Include role as root
       ansible.builtin.include_role:
         name: "{{ lookup('ansible.builtin.env', 'CI_PROJECT_NAME') }}"

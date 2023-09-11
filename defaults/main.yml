@@ -8,7 +8,7 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Upgrade Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-upgrade: true
+upgrade: false
 upgrade_changelog: true
 upgrade_chroot: /chroot
 upgrade_reboot: false
