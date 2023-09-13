@@ -35,23 +35,36 @@
       ansible.builtin.stat:
         path: /root/Changelog
       register: molecule_changelog_path
+      failed_when: not molecule_changelog_path.stat.exists | bool
 
-    - name: Print /root/Changelog
-      block:
-
-        - name: Slurp a base64 encoded version of the file
-          ansible.builtin.slurp:
-            src: /root/Changelog
-          register: molecule_changelog_b64encoded
-
-        - name: Decode the base64 encoded version of the changelog, split it by lines and set an array
-          ansible.builtin.set_fact:
-            molecule_changelog: "{{ ( molecule_changelog_b64encoded['content'] | b64decode | trim ).split('\n') }}"
-
-        - name: Print the Changelog contents
-          ansible.builtin.debug:
-            var: molecule_changelog
-
+    - name: Cat the Changelog
+      ansible.builtin.command: cat /root/Changelog
+      check_mode: false
+      changed_when: false
+      register: molecule_changelog_cat
       when: molecule_changelog_path.stat.exists
+
+    - name: Print the Changelog contents
+      ansible.builtin.debug:
+        var: molecule_changelog_cat is defined
+      when: molecule_changelog_cat.stdout_lines
+
+#    - name: Print /root/Changelog
+#      block:
+#
+#        - name: Slurp a base64 encoded version of the file
+#          ansible.builtin.slurp:
+#            src: /root/Changelog
+#          register: molecule_changelog_b64encoded
+#
+#        - name: Decode the base64 encoded version of the changelog, split it by lines and set an array
+#          ansible.builtin.set_fact:
+#            molecule_changelog: "{{ ( molecule_changelog_b64encoded['content'] | b64decode | trim ).split('\n') }}"
+#
+#        - name: Print the Changelog contents
+#          ansible.builtin.debug:
+#            var: molecule_changelog
+#
+#      when: molecule_changelog_path.stat.exists
 
 ...
