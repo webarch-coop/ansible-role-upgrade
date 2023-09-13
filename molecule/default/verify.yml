@@ -61,13 +61,21 @@
         patterns: "*.gz"
       register: molecule_backups
 
-    - name: Print the find Changelog backups result
-      ansible.builtin.debug:
-        var: molecule_backups.files
+    # - name: Print the find Changelog backups result
+    #   ansible.builtin.debug:
+    #     var: molecule_backups.files
 
-    - name: Ensure that a backup exists
+    - name: Set a fact for the first Changelog backup path
+      ansible.builtin.set_fact:
+        molecule_backup_path: "{{ molecule_backups | community.general.json_query('files[].path|[0]') }}"
+
+    - name: Print the first Changelog backup path
+      ansible.builtin.debug:
+        var: molecule_backup_path
+
+    - name: Ensure that the backup path is correct
       ansible.builtin.assert:
         that:
-          - molecule_backups | community.general.json_query('files[].path|[0]') is regex('^[/]root\/][.]Changelog[.].*[.gz]')
+          - molecule_backup_path is regex('^[/]root[/][.]Changelog[/]Changelog[.].*[.gz]')
 
 ...
