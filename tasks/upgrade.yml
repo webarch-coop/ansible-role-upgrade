@@ -35,16 +35,16 @@
 
     - name: Set a fact for the names of the packages upgraded
       ansible.builtin.set_fact:
-        upgrade_dist_upgraded: "{{ upgrade_dist_upgrade.stdout | split(' ') | select('regex', '^[ ]') }}"
+        upgrade_dist_upgraded: "{{ upgrade_dist_upgrade.stdout | split('\n') | select('regex', '^[ ]') }}"
       when: upgrade_dist_upgrade is defined
 
-    - name: Debug the results of the dist upgrade
+    - name: Debug the names of the packages upgraded
       ansible.builtin.debug:
-        var: upgrade_dist_upgrade
+        var: upgrade_dist_upgraded
         # verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-      when:
-        - upgrade_dist_upgraded is defined
-        - upgrade_dist_upgraded != []
+      # when:
+        # - upgrade_dist_upgraded is defined
+        # - upgrade_dist_upgraded != []
 
     - name: Update the Changelog
       block:
