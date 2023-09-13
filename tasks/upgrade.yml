@@ -27,50 +27,46 @@
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
       register: upgrade_dist_upgrade
 
-    # The logchange script is in the https://git.coop/webarch/scripts repo
-    # - name: Check the existance of /usr/local/bin/logchange
-    #   ansible.builtin.stat:
-    #     path: /usr/local/bin/logchange
-    #   register: upgrade_logchange
-
-    # - name: Update the Changelog
-    #   ansible.builtin.command: "/usr/local/bin/logchange '{{ upgrade_logchange_pkgs }} : updated'"
-    #   vars:
-    #     upgrade_logchange_pkgs: "{{ upgrade_pkgs | join(' ') }}"
-    #   environment:
-    #     PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-    #   changed_when: true
-    #   when:
-    #     - upgrade_pkgs is defined
-    #     - upgrade_pkgs != []
-    #     - upgrade_logchange.stat.exists |
+    - name: Debug the results of the dist upgrade
+      ansible.builtin.debug:
+        var: upgrade_dist_upgrade
 
     - name: Update the Changelog
       block:
 
+#        - name: Backup the Changelog
+#          ansible.builtin.copy:
+#            src: /root/Changelog
+#            dest: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
+#            remote_src: true
+#            mode: "0600"
+#            owner: root
+#            group: root
+#          when: upgrade_changelog_path.stat.exists
+#
+#        - name: Check that the Changelog backup exists
+#          ansible.builtin.stat:
+#            path: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
+#          register: upgrade_changelog_backup_path
+#
+#        - name: Gzip the Changelog backup
+#          ansible.builtin.command: "gzip /root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
+#          environment:
+#            PATH: /usr/sbin:/usr/bin:/sbin:/bin
+#          changed_when: true
+#          when:
+#            - upgrade_changelog_backup_path is defined
+#            - upgrade_changelog_backup_path.stat.exists | bool
+
         - name: Backup the Changelog
-          ansible.builtin.copy:
+          community.general.archive:
             src: /root/Changelog
-            dest: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
-            remote_src: true
+            dest: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}.gz"
+            remove: false
             mode: "0600"
             owner: root
             group: root
           when: upgrade_changelog_path.stat.exists
-
-        - name: Check that the Changelog backup exists
-          ansible.builtin.stat:
-            path: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
-          register: upgrade_changelog_backup_path
-
-        - name: Gzip the Changelog backup
-          ansible.builtin.command: "gzip /root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
-          environment:
-            PATH: /usr/sbin:/usr/bin:/sbin:/bin
-          changed_when: true
-          when:
-            - upgrade_changelog_backup_path is defined
-            - upgrade_changelog_backup_path.stat.exists | bool
 
         - name: Write the Changelog update  # noqa: command-instead-of-module
           ansible.builtin.shell: |-
@@ -80,36 +76,6 @@
           environment:
             PATH: /usr/sbin:/usr/bin:/sbin:/bin
           changed_when: true
-
-#        - name: Write the Changelog update
-#          ansible.builtin.template:
-#            src: changelog.j2
-#            dest: /root/.Changelog/update
-#            mode: "0600"
-#            owner: root
-#            group: root
-#
-#        - name: Check that the Changelog update exists
-#          ansible.builtin.stat:
-#            path: /root/.Changelog/update
-#          register: upgrade_changelog_update_path
-#
-#        - name: Append the Changelog update
-#          ansible.builtin.shell: cat /root/.Changelog/update >> /root/Changelog
-#          environment:
-#            PATH: /usr/sbin:/usr/bin:/sbin:/bin
-#          changed_when: true
-#          when:
-#            - upgrade_changelog_update_path is defined
-#            - upgrade_changelog_update_path.stat.exists | bool
-#
-#        - name: Delete the Changelog update
-#          ansible.builtin.file:
-#            path: /root/.Changelog/update
-#            state: absent
-#          when:
-#            - upgrade_changelog_update_path is defined
-#            - upgrade_changelog_update_path.stat.exists | bool
 
       when:
         - upgrade_changelog | bool

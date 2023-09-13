@@ -55,4 +55,14 @@
 
       when: molecule_changelog_path.stat.exists
 
+    - name: Find the Changelog backup
+      ansible.builtin.find:
+        paths: /root/.Changelog
+        patterns: "*.gz"
+      register: molecule_backups
+
+    - name: Print the find Changelog backups result
+      ansible.builtin.debug:
+        var: molecule_backups
+
 ...
