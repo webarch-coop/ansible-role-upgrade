@@ -30,6 +30,21 @@
     - name: Debug the results of the dist upgrade
       ansible.builtin.debug:
         var: upgrade_dist_upgrade
+        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      when: upgrade_dist_upgrade is defined
+
+    - name: Set a fact for the names of the packages upgraded
+      ansible.builtin.set_fact:
+        upgrade_dist_upgraded: "{{ upgrade_dist_upgrade.stdout | split(' ') | select('regex', '^[ ]') }}"
+      when: upgrade_dist_upgrade is defined
+
+    - name: Debug the results of the dist upgrade
+      ansible.builtin.debug:
+        var: upgrade_dist_upgrade
+        # verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      when:
+        - upgrade_dist_upgraded is defined
+        - upgrade_dist_upgraded != []
 
     - name: Update the Changelog
       block:
@@ -60,7 +75,7 @@
 
         - name: Backup the Changelog
           community.general.archive:
-            src: /root/Changelog
+            path: /root/Changelog
             dest: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}.gz"
             remove: false
             mode: "0600"
