@@ -42,11 +42,11 @@
       check_mode: false
       changed_when: false
       register: molecule_changelog_cat
-      when: molecule_changelog_path.stat.exists
+      when: molecule_changelog_path.stat.exists | bool
 
     - name: Print the Changelog contents
       ansible.builtin.debug:
-        var: molecule_changelog_cat is defined
+        var: molecule_changelog_cat.stdout_lines
       when: molecule_changelog_cat.stdout_lines
 
 #    - name: Print /root/Changelog
