@@ -63,6 +63,11 @@
 
     - name: Print the find Changelog backups result
       ansible.builtin.debug:
-        var: molecule_backups
+        var: molecule_backups.files
+
+    - name: Ensure that a backup exists
+      ansible.builtin.assert:
+        that:
+          - molecule_backups | community.general.json_query('files[].path|[0]') is regex('^[/]root\/][.]Changelog[.].*[.gz]')
 
 ...

@@ -41,37 +41,13 @@
     - name: Debug the names of the packages upgraded
       ansible.builtin.debug:
         var: upgrade_dist_upgraded
-        # verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-      # when:
-        # - upgrade_dist_upgraded is defined
-        # - upgrade_dist_upgraded != []
+        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      when:
+        - upgrade_dist_upgraded is defined
+        - upgrade_dist_upgraded != []
 
     - name: Update the Changelog
       block:
-
-#        - name: Backup the Changelog
-#          ansible.builtin.copy:
-#            src: /root/Changelog
-#            dest: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
-#            remote_src: true
-#            mode: "0600"
-#            owner: root
-#            group: root
-#          when: upgrade_changelog_path.stat.exists
-#
-#        - name: Check that the Changelog backup exists
-#          ansible.builtin.stat:
-#            path: "/root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
-#          register: upgrade_changelog_backup_path
-#
-#        - name: Gzip the Changelog backup
-#          ansible.builtin.command: "gzip /root/.Changelog/Changelog.{{ upgrade_changelog_time }}"
-#          environment:
-#            PATH: /usr/sbin:/usr/bin:/sbin:/bin
-#          changed_when: true
-#          when:
-#            - upgrade_changelog_backup_path is defined
-#            - upgrade_changelog_backup_path.stat.exists | bool
 
         - name: Backup the Changelog
           community.general.archive:
@@ -87,7 +63,7 @@
           ansible.builtin.shell: |-
             sed -i "1 i\
             {{ upgrade_changelog_date }}\t{{ upgrade_changelog_user }}\
-            \n\t*\t{{ upgrade_pkgs | join(' ') }} : updated\n" /root/Changelog
+            \n\t*\t{{ upgrade_dist_upgraded | join(' ') }} : updated\n" /root/Changelog
           environment:
             PATH: /usr/sbin:/usr/bin:/sbin:/bin
           changed_when: true
@@ -104,13 +80,16 @@
         name: docker
         state: restarted
       when: >-
-        ( "docker-ce" in upgrade_pkgs ) or
-        ( "containerd.io" in upgrade_pkgs )
+        ( upgrade_dist_upgraded is defined ) and
+        ( ( "docker-ce" in upgrade_dist_upgraded ) or
+        ( "containerd.io" in upgrade_dist_upgraded ) )
 
     - name: Reconfigure OpenProject if it has been updated
       ansible.builtin.command: openproject configure
       changed_when: true
-      when: ( "openproject" in upgrade_pkgs )
+      when:
+        - upgrade_dist_upgraded is defined
+        - ( "openproject" in upgrade_dist_upgraded )
 
     - name: Check the existance of /etc/munin/plugins/apt_all
       ansible.builtin.stat:
