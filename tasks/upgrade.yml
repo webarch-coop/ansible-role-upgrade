@@ -35,7 +35,7 @@
 
     - name: Set a fact for the names of the packages upgraded
       ansible.builtin.set_fact:
-        upgrade_dist_upgraded: "{{ upgrade_dist_upgrade.stdout | split('\n') | select('regex', '^[ ]') }}"
+        upgrade_dist_upgraded: "{{ upgrade_dist_upgrade.stdout | split('\n') | select('regex', '^[ ]{2}') | map('regex_replace', '^[ ]{2}') }}"
       when: upgrade_dist_upgrade is defined
 
     - name: Debug the names of the packages upgraded
