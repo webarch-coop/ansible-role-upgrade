@@ -33,6 +33,7 @@
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
       when: upgrade_dist_upgrade is defined
 
+    # This doesn't work, see https://git.coop/webarch/upgrade/-/issues/2
     - name: Set a fact for the names of the packages upgraded
       ansible.builtin.set_fact:
         upgrade_dist_upgraded: "{{ upgrade_dist_upgrade.stdout | split('\n') | select('regex', '^[ ]{2}') | map('regex_replace', '^[ ]{2}') }}"
@@ -59,6 +60,8 @@
             group: root
           when: upgrade_changelog_path.stat.exists
 
+        # TODO strip everything after a colon from package names see https://askubuntu.com/a/1262555
+        # to adoid entries like this linux-image-6.1.0-10-amd64:amd64/bookworm
         - name: Write the Changelog update  # noqa: command-instead-of-module
           ansible.builtin.shell: |-
             sed -i "1 i\
