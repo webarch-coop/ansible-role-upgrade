@@ -60,6 +60,15 @@
             group: root
           when: upgrade_changelog_path.stat.exists
 
+        - name: Touch the Changelog when it doesn't exist
+          ansible.builtin.file:
+            path: /root/Changelog
+            state: touch
+            mode: "0600"
+            owner: root
+            group: root
+          when: not upgrade_changelog_path.stat.exists
+
         # TODO strip everything after a colon from package names see https://askubuntu.com/a/1262555
         # to adoid entries like this linux-image-6.1.0-10-amd64:amd64/bookworm
         - name: Write the Changelog update  # noqa: command-instead-of-module
