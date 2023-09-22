@@ -60,10 +60,10 @@
             group: root
           when: upgrade_changelog_path.stat.exists
 
-        - name: Touch the Changelog when it doesn't exist
-          ansible.builtin.file:
-            path: /root/Changelog
-            state: touch
+        - name: Template the Changelog when it doesn't exist
+          ansible.builtin.template:
+            src: Changelog.j2
+            dest: /root/Changelog
             mode: "0600"
             owner: root
             group: root
