@@ -35,4 +35,5 @@
         name: "{{ lookup('ansible.builtin.env', 'CI_PROJECT_NAME') }}"
       vars:  # noqa var-naming[no-role-prefix]
         upgrade: true
+        upgrade_restart: false
 ...
