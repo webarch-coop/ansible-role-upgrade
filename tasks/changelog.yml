@@ -56,6 +56,24 @@
         path: /root/Changelog
       register: upgrade_changelog_path
 
+    - name: Create an initial Changelog
+      block:
+
+        - name: Template the Changelog when it doesn't exist
+          ansible.builtin.template:
+            src: Changelog.j2
+            dest: /root/Changelog
+            mode: "0600"
+            owner: root
+            group: root
+
+        - name: Check if the Changelog exists
+          ansible.builtin.stat:
+            path: /root/Changelog
+          register: upgrade_changelog_path
+
+      when: not upgrade_changelog_path.stat.exists
+
   tags:
     - upgrade
 ...
