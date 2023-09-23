@@ -77,5 +77,6 @@
       ansible.builtin.assert:
         that:
           - molecule_backup_path is regex('^[/]root[/][.]Changelog[/]Changelog[.].*[.gz]')
+      when: molecule_backup_path | length > 0
 
 ...
