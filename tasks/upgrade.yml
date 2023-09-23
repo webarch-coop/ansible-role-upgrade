@@ -50,6 +50,11 @@
     - name: Update the Changelog
       block:
 
+        - name: Check if the Changelog exists
+          ansible.builtin.stat:
+            path: /root/Changelog
+          register: upgrade_changelog_path
+
         - name: Backup the Changelog
           community.general.archive:
             path: /root/Changelog
@@ -58,7 +63,7 @@
             mode: "0600"
             owner: root
             group: root
-          when: upgrade_changelog_path.stat.exists
+          when: upgrade_changelog_path.stat.exists | bool
 
         # TODO strip everything after a colon from package names see https://askubuntu.com/a/1262555
         # to adoid entries like this linux-image-6.1.0-10-amd64:amd64/bookworm
