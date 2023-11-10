@@ -92,9 +92,8 @@
         ( ( "docker-ce" in upgrade_pkgs ) or
         ( "containerd.io" in upgrade_pkgs ) )
 
-    - name: Reconfigure OpenProject if it has been updated
-      ansible.builtin.command: openproject configure
-      changed_when: true
+    - name: Include OpenProject tasks
+      ansible.builtin.include_tasks: op.yml
       when:
         - upgrade_pkgs is defined
         - ( "openproject" in upgrade_pkgs )
