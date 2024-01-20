@@ -32,12 +32,22 @@ A boolean, restart systemd services when then are listed by `needrestart -b`, `u
 
 A optional list of names of services that should not be restated, by default `upgrade_restart_skip` is a list containing only one service, `dbus.service`.
 
+## Notes
+
+If a apt repo is down this role will fail, in this case you can uypdate servers like this:
+
+```bash
+ansible example.org -m ansible.builtin.shell -a "sudo apt update && sudo DEBIAN_FRONTEND=noninteractive apt full-upgrade -y"
+```
+
 ## Repository
 
 The primary URL of this repo is [`https://git.coop/webarch/upgrade`](https://git.coop/webarch/upgrade) however it is also [mirrored to GitHub](https://github.com/webarch-coop/ansible-role-upgrade) and [available via Ansible Galaxy](https://galaxy.ansible.com/chriscroome/upgrade).
 
 If you use this role please use a tagged release, see [the release notes](https://git.coop/webarch/upgrade/-/releases).
 
-## License
+## Copyright
+
+Copyright 2018-2024 Chris Croome, &lt;[chris@webarchitects.co.uk](mailto:chris@webarchitects.co.uk)&gt;.
 
 This role is released under [the same terms as Ansible itself](https://github.com/ansible/ansible/blob/devel/COPYING), the [GNU GPLv3](LICENSE).
