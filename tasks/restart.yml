@@ -28,7 +28,7 @@
         ( upgrade_restart_skip is not defined ) or
         ( upgrade_service not in upgrade_restart_skip )
 
-    - name: A reboot is required
+    - name: A reboot is required but it is being skipped for now
       ansible.builtin.debug:
         msg:
           - "{{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }} is the current running kernel"

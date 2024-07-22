@@ -155,16 +155,85 @@
             upgrade_services: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', '[.]service$') | map('regex_replace', '^NEEDRESTART-SVC: ') }}"
             upgrade_systemd_daemon_reexec: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') | map('regex_replace', '^NEEDRESTART-SVC: ') | bool }}"
 
-        - name: Include the restart tasks
-          ansible.builtin.include_tasks: restart.yml
+        - name: No services require a restart  # noqa: jinja[spacing]
+          ansible.builtin.debug:
+            msg: "{{ upgrade_debug_msg | trim }}"
+          vars:
+            upgrade_debug_msg: >-
+              The restart services tasks are being skipped because
+              {%- if not upgrade_restart | bool %} upgrade_restart is False
+              {%- elif upgrade_reboot | bool and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3" %} the server is to be rebooted
+              {%- elif upgrade_services == [] %} no services require a restart{%- elif not upgrade_systemd_daemon_reexec | bool %} a systemd daemon-reexec is not required{%- endif -%}
+          when: >-
+            ( not upgrade_restart | bool ) or
+            ( upgrade_reboot | bool and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3" ) or
+            ( upgrade_services == [] ) or
+            ( not upgrade_systemd_daemon_reexec | bool )
+
+        - name: Restart services
+          block:
+
+            - name: Restarting services
+              ansible.builtin.debug:
+                msg: "{{ upgrade_debug_msg | trim }}"
+              vars:
+                upgrade_debug_msg: >-
+                  Including the restart services tasks as upgrade_restart is {{ upgrade_restart }}, upgrade_reboot is {{ upgrade_reboot }} and
+                  {% if upgrade_services != [] %}the upgrade_services list contains {{ upgrade_services | join(', ') }}
+                  {% elif upgrade_systemd_daemon_reexec | bool %}upgrade_systemd_daemon_reexec is {{ upgrade_systemd_daemon_reexec }}
+                  {% endif -%}
+
+            - name: Include the restart tasks
+              ansible.builtin.include_tasks: restart.yml
+
           when:
-            - not upgrade_reboot | bool
+            - ( not upgrade_reboot | bool ) or ( upgrade_needrestart_yaml['NEEDRESTART-KSTA'] != "3" )
             - upgrade_restart | bool
             - ( upgrade_services != [] ) or ( upgrade_systemd_daemon_reexec | bool )
 
-        - name: Include the reboot tasks
-          ansible.builtin.include_tasks: reboot.yml
-          when: upgrade_reboot | bool
+        - name: A reboot is not required
+          ansible.builtin.debug:
+            msg: "{{ upgrade_debug_msg | trim }}"
+          vars:
+            upgrade_debug_msg: >-
+              The running kernel {{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }} is the latest so a reboot is not required
+          when: >-
+            ( upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is not defined ) or
+            ( ( upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined ) and
+            ( upgrade_needrestart_yaml['NEEDRESTART-KSTA'] != "3" ) )
+
+        - name: A reboot is required but is to be skipped
+          ansible.builtin.debug:
+            msg: "{{ upgrade_debug_msg | trim }}"
+          vars:
+            upgrade_debug_msg: >-
+              {{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }} is the current running kernel and
+              {{ upgrade_needrestart_yaml['NEEDRESTART-KEXP'] }} is the expected kernel
+              but upgrade_reboot is {{ upgrade_reboot }} so the reboot tasks are being skipped
+          when:
+            - not upgrade_reboot | bool
+            - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined
+            - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3"
+
+        - name: Reboot server
+          block:
+
+            - name: Rebooting server
+              ansible.builtin.debug:
+                msg: "{{ upgrade_debug_msg | trim }}"
+              vars:
+                upgrade_debug_msg: >-
+                  Including the reboot server tasks as the upgrade_reboot variable is set to {{ upgrade_reboot }} and
+                  {{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }} is the current running kernel and
+                  {{ upgrade_needrestart_yaml['NEEDRESTART-KEXP'] }} is the expected kernel
+
+            - name: Include the reboot tasks
+              ansible.builtin.include_tasks: reboot.yml
+
+          when:
+            - upgrade_reboot | bool
+            - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined
+            - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3"
 
       when:
         - upgrade_needrestart_bin.stat.exists | bool
