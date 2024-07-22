@@ -196,7 +196,9 @@
             msg: "{{ upgrade_debug_msg | trim }}"
           vars:
             upgrade_debug_msg: >-
-              The running kernel {{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }} is the latest so a reboot is not required
+              The running kernel
+              {% if upgrade_needrestart_yaml['NEEDRESTART-KCUR'] is defined %}{{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }}{% endif %}
+              is the latest so a reboot is not required
           when: >-
             ( upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is not defined ) or
             ( ( upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined ) and
