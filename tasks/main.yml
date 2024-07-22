@@ -155,7 +155,7 @@
             upgrade_services: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', '[.]service$') | map('regex_replace', '^NEEDRESTART-SVC: ') }}"
             upgrade_systemd_daemon_reexec: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') | map('regex_replace', '^NEEDRESTART-SVC: ') | bool }}"
 
-        - name: No services require a restart  # noqa: jinja[spacing]
+        - name: No services are to be restarted  # noqa: jinja[spacing]
           ansible.builtin.debug:
             msg: "{{ upgrade_debug_msg | trim }}"
           vars:
@@ -163,7 +163,8 @@
               The restart services tasks are being skipped because
               {%- if not upgrade_restart | bool %} upgrade_restart is False
               {%- elif upgrade_reboot | bool and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3" %} the server is to be rebooted
-              {%- elif upgrade_services == [] %} no services require a restart{%- elif not upgrade_systemd_daemon_reexec | bool %} a systemd daemon-reexec is not required{%- endif -%}
+              {%- elif upgrade_services == [] %} no services require a restart
+              {%- elif not upgrade_systemd_daemon_reexec | bool %} a systemd daemon-reexec is not required{%- endif -%}
           when: >-
             ( not upgrade_restart | bool ) or
             ( upgrade_reboot | bool and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3" ) or
