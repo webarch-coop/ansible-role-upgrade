@@ -101,10 +101,9 @@
       ansible.builtin.service:
         name: docker
         state: restarted
-      when: >-
-        ( upgrade_pkgs is defined ) and
-        ( ( "docker-ce" in upgrade_pkgs ) or
-        ( "containerd.io" in upgrade_pkgs ) )
+      when:
+        - upgrade_pkgs is defined
+        - ( "docker-ce" in upgrade_pkgs )
 
     - name: Include OpenProject tasks
       ansible.builtin.include_tasks: op.yml
