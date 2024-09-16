@@ -32,7 +32,7 @@
       when: upgrade_dist_upgrade.stdout_lines is defined
 
     - name: Apt clean  # noqa command-instead-of-module no-changed-when
-      ansible.builtin.command: apt clean
+      ansible.builtin.command: apt clean -yq
       environment:
         DEBIAN_FRONTEND: noninteractive
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
