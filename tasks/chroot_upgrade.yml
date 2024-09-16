@@ -26,6 +26,13 @@
       changed_when: false
       register: upgrade_chroot_apt_autoremove
 
+    - name: Apt clean in the chroot  # noqa yaml[comments] command-instead-of-module
+      ansible.builtin.command: "chroot {{ upgrade_chroot }} apt clean -yq"
+      environment:
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
+      changed_when: false
+      register: upgrade_chroot_apt_clean
+
     - name: Remove set GID from files  # noqa yaml[comments] command-instead-of-module
       ansible.builtin.shell: "for i in $( find {{ upgrade_chroot }} -perm -2000 ); do chmod g-s $i; done"
       environment:

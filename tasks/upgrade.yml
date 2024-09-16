@@ -31,21 +31,36 @@
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
       when: upgrade_dist_upgrade.stdout_lines is defined
 
-    - name: Apt autoclean and autoremove
-      ansible.builtin.apt:
-        autoclean: true
-        autoremove: true
-        dpkg_options: force-confdef,force-confold
+    - name: Apt clean  # noqa command-instead-of-module no-changed-when
+      ansible.builtin.command: apt clean
       environment:
         DEBIAN_FRONTEND: noninteractive
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
-      register: upgrade_dist_autoclean
+      register: upgrade_dist_apt_clean
+      changed_when: upgrade_dist_apt_clean.stdout_lines | length > 0
 
     - name: Debug the results of the autoclean and autoremove
       ansible.builtin.debug:
-        var: upgrade_dist_autoclean.stdout_lines
+        var: upgrade_dist_apt_clean.stdout_lines
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-      when: upgrade_dist_autoclean.stdout_lines is defined
+      when: upgrade_dist_apt_clean.stdout_lines | length > 0
+
+    # The following two tasks doesn't clear the cache as well as apt clean does?!
+    # - name: Apt autoclean and autoremove
+    #   ansible.builtin.apt:
+    #     autoclean: true
+    #     autoremove: true
+    #     dpkg_options: force-confdef,force-confold
+    #   environment:
+    #     DEBIAN_FRONTEND: noninteractive
+    #     PATH: /usr/sbin:/usr/bin:/sbin:/bin
+    #   register: upgrade_dist_autoclean
+
+    # - name: Debug the results of the autoclean and autoremove
+    #   ansible.builtin.debug:
+    #     var: upgrade_dist_autoclean.stdout_lines
+    #     verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+    #   when: upgrade_dist_autoclean.stdout_lines is defined
 
     # This doesn't work, see https://git.coop/webarch/upgrade/-/issues/2
     # - name: Set a fact for the names of the packages upgraded
