@@ -21,7 +21,7 @@
     - name: This role needs to be run as root
       ansible.builtin.assert:
         that:
-          - ansible_effective_user_id == 0
+          - ansible_facts.effective_user_id == 0
         quiet: true
 
     - name: Check if system has been booted with systemd as init system
