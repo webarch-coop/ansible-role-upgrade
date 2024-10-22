@@ -9,9 +9,15 @@
 # You should have received a copy of the GNU General Public License along with the Webarchitects Upgrade Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
 variables:
+  ANSIBLE_ANY_ERRORS_FATAL: "1"
   ANSIBLE_CALLBACK_RESULT_FORMAT: "yaml"
+  ANSIBLE_DEFAULT_VERBOSITY: "1"
+  ANSIBLE_DIFF_ALWAYS: "1"
   ANSIBLE_DISPLAY_SKIPPED_HOSTS: "0"
+  ANSIBLE_ERROR_ON_UNDEFINED_VARS: "1"
   ANSIBLE_FORCE_COLOR: "1"
+  ANSIBLE_INJECT_FACT_VARS: "0"
+  ANSIBLE_NOCOWS: "1"
   ANSIBLE_REMOTE_TMP: "/tmp"
   ANSIBLE_SHELL_ALLOW_WORLD_READABLE_TEMP: "1"
   DEBIAN_FRONTEND: noninteractive
@@ -31,66 +37,66 @@ before_script:
 stages:
   # the version of containers before last from
   # https://git.coop/webarch/containers#docker-containers
-  - 20240721_bookworm
-  - 20240721_jammy
-  - 20240721_noble
-  - 20240721_trixie
+  - 20240911_bookworm
+  - 20240911_jammy
+  - 20240911_noble
+  - 20240911_trixie
   # the latest containers
   - bookworm
   - jammy
   - noble
   - trixie
-20240721_bookworm:
-  image: registry.git.coop/webarch/containers/images/bookworm:20240721
-  stage: 20240721_bookworm
+20240911_bookworm:
+  image: registry.git.coop/webarch/containers/images/bookworm:20240911
+  stage: 20240911_bookworm
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-20240721_jammy:
-  image: registry.git.coop/webarch/containers/images/jammy:20240721
-  stage: 20240721_jammy
+20240911_jammy:
+  image: registry.git.coop/webarch/containers/images/jammy:20240911
+  stage: 20240911_jammy
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-20240721_noble:
-  image: registry.git.coop/webarch/containers/images/noble:20240721
-  stage: 20240721_noble
+20240911_noble:
+  image: registry.git.coop/webarch/containers/images/noble:20240911
+  stage: 20240911_noble
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-20240721_trixie:
-  image: registry.git.coop/webarch/containers/images/trixie:20240721
-  stage: 20240721_trixie
+20240911_trixie:
+  image: registry.git.coop/webarch/containers/images/trixie:20240911
+  stage: 20240911_trixie
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
 bookworm:
-  image: registry.git.coop/webarch/containers/images/bookworm:20240911
+  image: registry.git.coop/webarch/containers/images/bookworm:20241008
   stage: bookworm
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
 jammy:
-  image: registry.git.coop/webarch/containers/images/jammy:20240911
+  image: registry.git.coop/webarch/containers/images/jammy:20241008
   stage: jammy
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
 noble:
-  image: registry.git.coop/webarch/containers/images/noble:20240911
+  image: registry.git.coop/webarch/containers/images/noble:20241008
   stage: noble
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
 trixie:
-  image: registry.git.coop/webarch/containers/images/trixie:20240911
+  image: registry.git.coop/webarch/containers/images/trixie:20241008
   stage: trixie
   script:
     - pre-commit install

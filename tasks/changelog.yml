@@ -21,35 +21,35 @@
 
     - name: Set fact for the date and time
       ansible.builtin.set_fact:
-        upgrade_changelog_date: "{{ ansible_date_time.date }}"
-        upgrade_changelog_time: "{{ ansible_date_time.iso8601_micro }}"
+        upgrade_changelog_date: "{{ ansible_facts.date_time.date }}"
+        upgrade_changelog_time: "{{ ansible_facts.date_time.iso8601_micro }}"
 
     - name: Set fact for the user name using GITLAB_USER_LOGIN
       ansible.builtin.set_fact:
-        upgrade_changelog_user: "{{ ansible_env.GITLAB_USER_LOGIN }}"
-      when: ansible_env.GITLAB_USER_LOGIN is defined
+        upgrade_changelog_user: "{{ ansible_facts.env.GITLAB_USER_LOGIN }}"
+      when: ansible_facts.env.GITLAB_USER_LOGIN is defined
 
     - name: Set fact for the user name using SUDO_USER
       ansible.builtin.set_fact:
-        upgrade_changelog_user: "{{ ansible_env.SUDO_USER }}"
-      when: ansible_env.SUDO_USER is defined
+        upgrade_changelog_user: "{{ ansible_facts.env.SUDO_USER }}"
+      when: ansible_facts.env.SUDO_USER is defined
 
     - name: Set fact for the user name using USER
       ansible.builtin.set_fact:
-        upgrade_changelog_user: "{{ ansible_env.USER }}"
+        upgrade_changelog_user: "{{ ansible_facts.env.USER }}"
       when:
-        - ansible_env.USER is defined
-        - ansible_env.GITLAB_USER_LOGIN is not defined
-        - ansible_env.SUDO_USER is not defined
+        - ansible_facts.env.USER is defined
+        - ansible_facts.env.GITLAB_USER_LOGIN is not defined
+        - ansible_facts.env.SUDO_USER is not defined
 
     - name: Set fact for the username to root
       ansible.builtin.set_fact:
         upgrade_changelog_user: root
       when:
-        - ansible_effective_user_id == 0
-        - ansible_env.USER is not defined
-        - ansible_env.GITLAB_USER_LOGIN is not defined
-        - ansible_env.SUDO_USER is not defined
+        - ansible_facts.effective_user_id == 0
+        - ansible_facts.env.USER is not defined
+        - ansible_facts.env.GITLAB_USER_LOGIN is not defined
+        - ansible_facts.env.SUDO_USER is not defined
 
     - name: Check if the Changelog exists
       ansible.builtin.stat:
