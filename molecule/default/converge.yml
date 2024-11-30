@@ -37,4 +37,8 @@
         upgrade: true
         upgrade_reboot: false
         upgrade_restart: true
+        upgrade_restart_skip:
+          - bash.service
+          - dbus.service
+          # - systemd-logind.service
 ...
