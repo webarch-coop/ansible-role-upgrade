@@ -31,36 +31,20 @@
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
       when: upgrade_dist_upgrade.stdout_lines is defined
 
-    - name: Apt clean  # noqa command-instead-of-module no-changed-when
-      ansible.builtin.command: apt clean -yq
+    - name: Apt autoremove and clean
+      ansible.builtin.apt:
+        autoremove: true
+        clean: true
       environment:
         DEBIAN_FRONTEND: noninteractive
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
       register: upgrade_dist_apt_clean
-      changed_when: upgrade_dist_apt_clean.stdout_lines | length > 0
 
-    - name: Debug the results of the autoclean and autoremove
+    - name: Debug the results of apt autoremove and clean
       ansible.builtin.debug:
-        var: upgrade_dist_apt_clean.stdout_lines
+        var: upgrade_dist_apt_clean
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-      when: upgrade_dist_apt_clean.stdout_lines | length > 0
-
-    # The following two tasks doesn't clear the cache as well as apt clean does?!
-    # - name: Apt autoclean and autoremove
-    #   ansible.builtin.apt:
-    #     autoclean: true
-    #     autoremove: true
-    #     dpkg_options: force-confdef,force-confold
-    #   environment:
-    #     DEBIAN_FRONTEND: noninteractive
-    #     PATH: /usr/sbin:/usr/bin:/sbin:/bin
-    #   register: upgrade_dist_autoclean
-
-    # - name: Debug the results of the autoclean and autoremove
-    #   ansible.builtin.debug:
-    #     var: upgrade_dist_autoclean.stdout_lines
-    #     verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-    #   when: upgrade_dist_autoclean.stdout_lines is defined
+      when: upgrade_dist_apt_clean | length > 0
 
     # This doesn't work, see https://git.coop/webarch/upgrade/-/issues/2
     # - name: Set a fact for the names of the packages upgraded
@@ -95,7 +79,7 @@
           when: upgrade_changelog_path.stat.exists | bool
 
         # TODO strip everything after a colon from package names see https://askubuntu.com/a/1262555
-        # to adoid entries like this linux-image-6.1.0-10-amd64:amd64/bookworm
+        # to avoid entries like this linux-image-6.1.0-10-amd64:amd64/bookworm
         - name: Write the Changelog update  # noqa: command-instead-of-module
           ansible.builtin.shell: |-
             sed -i "1 i\
