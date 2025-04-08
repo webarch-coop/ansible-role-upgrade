@@ -1,4 +1,4 @@
-# Copyright 2018-2024 Chris Croome
+# Copyright 2018-2025 Chris Croome
 #
 # This file is part of the Webarchitects Upgrade Ansible role.
 #
@@ -24,9 +24,7 @@
       loop: "{{ upgrade_services }}"
       loop_control:
         loop_var: upgrade_service
-      when: >-
-        ( upgrade_restart_skip is not defined ) or
-        ( upgrade_service not in upgrade_restart_skip )
+        label: "{{ upgrade_service | ansible.builtin.regex_replace('[.]service$') }}"
 
     - name: A reboot is required but it is being skipped for now
       ansible.builtin.debug:

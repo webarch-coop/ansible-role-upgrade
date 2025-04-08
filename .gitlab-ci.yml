@@ -1,4 +1,4 @@
-# Copyright 2018-2024 Chris Croome
+# Copyright 2018-2025 Chris Croome
 #
 # This file is part of the Webarchitects Upgrade Ansible role.
 #
@@ -19,6 +19,7 @@ variables:
   ANSIBLE_INJECT_FACT_VARS: "0"
   ANSIBLE_NOCOWS: "1"
   ANSIBLE_REMOTE_TMP: "/tmp"
+  ANSIBLE_ROLES_PATH: "${CI_PROJECT_DIR}/..:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles"
   ANSIBLE_SHELL_ALLOW_WORLD_READABLE_TEMP: "1"
   DEBIAN_FRONTEND: noninteractive
   DEFAULT_MANAGED_STR: "Ansible managed"
@@ -37,32 +38,32 @@ before_script:
 stages:
   # the last version of containers
   # https://git.coop/webarch/containers#docker-containers
-  - 20241008_bookworm
-  - 20241008_jammy
-  - 20241008_noble
-  - 20241008_trixie
+  - 20250213_bookworm
+  - 20250213_jammy
+  - 20250213_noble
+  - 20250213_trixie
   # the latest containers
   - bookworm
   - jammy
   - noble
   - trixie
-20241008_bookworm:
-  image: registry.git.coop/webarch/containers/images/bookworm:20241008
-  stage: 20241008_bookworm
+20250213_bookworm:
+  image: registry.git.coop/webarch/containers/images/bookworm:20250213
+  stage: 20250213_bookworm
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-20241008_jammy:
-  image: registry.git.coop/webarch/containers/images/jammy:20241008
-  stage: 20241008_jammy
+20250213_jammy:
+  image: registry.git.coop/webarch/containers/images/jammy:20250213
+  stage: 20250213_jammy
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-20241008_noble:
-  image: registry.git.coop/webarch/containers/images/noble:20241008
-  stage: 20241008_noble
+20250213_noble:
+  image: registry.git.coop/webarch/containers/images/noble:20250213
+  stage: 20250213_noble
   script:
     - pre-commit install
     - pre-commit run --all-files

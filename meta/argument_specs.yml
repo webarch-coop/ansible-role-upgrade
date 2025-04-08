@@ -1,4 +1,4 @@
-# Copyright 2018-2024 Chris Croome
+# Copyright 2018-2025 Chris Croome
 #
 # This file is part of the Webarchitects Upgrade Ansible role.
 #
@@ -37,6 +37,10 @@ argument_specs:
       upgrade_restart_skip:
         type: list
         elements: str
-        required: false
+        required: true
         description: A list of services that should not be restarted.
+      upgrade_restart_skip_regex:
+        type: str
+        required: true
+        description: A regular expression to match service names that should not be restarted."
 ...

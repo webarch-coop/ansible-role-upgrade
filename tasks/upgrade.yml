@@ -1,4 +1,4 @@
-# Copyright 2018-2024 Chris Croome
+# Copyright 2018-2025 Chris Croome
 #
 # This file is part of the Webarchitects Upgrade Ansible role.
 #
@@ -17,9 +17,11 @@
 
     - name: Dist upgrade
       ansible.builtin.apt:
-        upgrade: dist
-        update_cache: false
+        cache_valid_time: 60
+        clean: true
         dpkg_options: force-confdef,force-confold
+        update_cache: true
+        upgrade: dist
       environment:
         DEBIAN_FRONTEND: noninteractive
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
@@ -38,13 +40,15 @@
       environment:
         DEBIAN_FRONTEND: noninteractive
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
-      register: upgrade_dist_apt_clean
+      register: upgrade_dist_apt_autoremove
 
-    - name: Debug the results of apt autoremove and clean
+    - name: Debug the results of apt autoremove
       ansible.builtin.debug:
-        var: upgrade_dist_apt_clean
+        var: upgrade_dist_apt_autoremove
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-      when: upgrade_dist_apt_clean | length > 0
+      when: upgrade_dist_apt_autoremove | length > 0
+      tags:
+        - debug
 
     # This doesn't work, see https://git.coop/webarch/upgrade/-/issues/2
     # - name: Set a fact for the names of the packages upgraded

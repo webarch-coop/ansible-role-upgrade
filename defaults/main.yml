@@ -1,4 +1,4 @@
-# Copyright 2018-2024 Chris Croome
+# Copyright 2018-2025 Chris Croome
 #
 # This file is part of the Webarchitects Upgrade Ansible role.
 #
@@ -15,4 +15,5 @@ upgrade_reboot: false
 upgrade_restart: true
 upgrade_restart_skip:
   - dbus.service
+upgrade_restart_skip_regex: '^valkey-.*'
 ...

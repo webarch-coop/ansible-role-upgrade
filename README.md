@@ -30,7 +30,11 @@ A boolean, restart systemd services when then are listed by `needrestart -b`, `u
 
 ### upgrade_restart_skip
 
-A optional list of names of services that should not be restated, by default `upgrade_restart_skip` is a list containing only one service, `dbus.service`.
+A list of names of services that should not be restated, by default `upgrade_restart_skip` is a list containing only one service, `dbus.service`, set to `[]` if no services should be skipped.
+
+### upgrade_restart_skip_regex
+
+A regular expression to match names of services that should not be restated, by default `upgrade_restart_skip_regex` is iset to `^valkey-.*`, set to `""` if no services should be skipped.
 
 ## Notes
 
@@ -48,6 +52,6 @@ If you use this role please use a tagged release, see [the release notes](https:
 
 ## Copyright
 
-Copyright 2018-2024 Chris Croome, &lt;[chris@webarchitects.co.uk](mailto:chris@webarchitects.co.uk)&gt;.
+Copyright 2018-2025 Chris Croome, &lt;[chris@webarchitects.co.uk](mailto:chris@webarchitects.co.uk)&gt;.
 
 This role is released under [the same terms as Ansible itself](https://github.com/ansible/ansible/blob/devel/COPYING), the [GNU GPLv3](LICENSE).

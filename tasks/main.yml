@@ -1,4 +1,4 @@
-# Copyright 2018-2024 Chris Croome
+# Copyright 2018-2025 Chris Croome
 #
 # This file is part of the Webarchitects Upgrade Ansible role.
 #
@@ -51,6 +51,8 @@
       ansible.builtin.debug:
         var: upgrade_init
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
 
     - name: The init system is not defined
       ansible.builtin.assert:
@@ -152,8 +154,15 @@
           ansible.builtin.set_fact:
             # Note that the JC ini parser results in a max of one service being listed see https://github.com/kellyjonbrazil/jc/issues/339
             upgrade_needrestart_yaml: "{{ upgrade_needrestart_cmd.stdout | string | community.general.jc('ini') }}"
-            upgrade_services: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', '[.]service$') | map('regex_replace', '^NEEDRESTART-SVC: ') }}"
+            upgrade_services: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', '[.]service$') | map('regex_replace', '^NEEDRESTART-SVC: ') | ansible.builtin.difference(upgrade_restart_skip) | reject('regex', upgrade_restart_skip_regex) }}"
             upgrade_systemd_daemon_reexec: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') | map('regex_replace', '^NEEDRESTART-SVC: ') | bool }}"
+
+        - name: Debug upgrade_services
+          ansible.builtin.debug:
+            var: upgrade_services
+            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+          tags:
+            - debug
 
         # This generates false positives
         # - name: No services are to be restarted  # noqa: jinja[spacing]
