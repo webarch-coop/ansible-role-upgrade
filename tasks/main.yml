@@ -94,7 +94,7 @@
 
     - name: Set a fact for the available updates
       ansible.builtin.set_fact:
-        upgrade_pkgs: "{{ upgrade_apt_check.stdout_lines | select('regex', '^Inst[ ].*') | map('regex_replace', '^Inst ') | map('regex_replace', '[ ].*$') }}"
+        upgrade_pkgs: "{{ upgrade_apt_check.stdout_lines | select('regex', '^Inst[ ].*') | map('regex_replace', '^Inst ') | map('regex_replace', '[ ].*$') | sort }}"
       when:
         - upgrade_apt_check.stdout_lines is defined
         - upgrade_apt_check.stdout_lines != []
