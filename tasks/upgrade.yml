@@ -39,7 +39,7 @@
         DEBIAN_FRONTEND: noninteractive
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
       register: upgrade_dist_apt_autoremove
-      changed_when: upgrade_dist_apt_autoremove.stdout_lines > 1
+      changed_when: upgrade_dist_apt_autoremove.stdout_lines | length > 1
 
     - name: Debug the results of apt autoremove
       ansible.builtin.debug:
