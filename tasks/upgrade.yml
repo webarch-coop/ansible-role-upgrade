@@ -33,20 +33,35 @@
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
       when: upgrade_dist_upgrade.stdout_lines is defined
 
-    - name: Apt autoremove and clean
-      ansible.builtin.apt:
-        autoremove: true
-        clean: true
+    - name: Apt autoremove
+      ansible.builtin.command: apt autoremove -y
       environment:
         DEBIAN_FRONTEND: noninteractive
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
       register: upgrade_dist_apt_autoremove
+      changed_when: upgrade_dist_apt_autoremove.stdout_lines > 1
 
     - name: Debug the results of apt autoremove
       ansible.builtin.debug:
         var: upgrade_dist_apt_autoremove
         verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
       when: upgrade_dist_apt_autoremove | length > 0
+      tags:
+        - debug
+
+    - name: Apt clean
+      ansible.builtin.apt:
+        clean: true
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
+      register: upgrade_dist_apt_clean
+
+    - name: Debug the results of apt clean
+      ansible.builtin.debug:
+        var: upgrade_dist_apt_clean
+        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      when: upgrade_dist_apt_clean | length > 0
       tags:
         - debug
 
