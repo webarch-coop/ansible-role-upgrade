@@ -29,6 +29,8 @@ variables:
 before_script:
   - whoami
   - pwd
+  - which jc
+  - jc --version
   - which ansible
   - ansible --version
   - which yamllint
