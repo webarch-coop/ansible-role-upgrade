@@ -81,28 +81,28 @@ stages:
     - molecule test
 20250821_bookworm:
   image: registry.git.coop/webarch/containers/images/bookworm:20250821
-  stage: bookworm
+  stage: 20250821_bookworm
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
 20250821_jammy:
   image: registry.git.coop/webarch/containers/images/jammy:20250821
-  stage: jammy
+  stage: 20250821_jammy
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
 20250821_noble:
   image: registry.git.coop/webarch/containers/images/noble:20250821
-  stage: noble
+  stage: 20250821_noble
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
 20250821_trixie:
   image: registry.git.coop/webarch/containers/images/trixie:20250821
-  stage: trixie
+  stage: 20250821_trixie
   script:
     - pre-commit install
     - pre-commit run --all-files
