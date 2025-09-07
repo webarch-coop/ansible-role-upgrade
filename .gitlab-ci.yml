@@ -40,17 +40,17 @@ before_script:
   - which molecule
   - molecule --version
 stages:
-  # the last version of containers
+  # An older version of containers to test upgrades
   # https://git.coop/webarch/containers#docker-containers
   - 20250802_bookworm
   - 20250802_jammy
   - 20250802_noble
   - 20250802_trixie
-  # the latest containers
-  - bookworm
-  - jammy
-  - noble
-  - trixie
+  # A recent version of the containers
+  - 20250821_bookworm
+  - 20250821_jammy
+  - 20250821_noble
+  - 20250821_trixie
 20250802_bookworm:
   image: registry.git.coop/webarch/containers/images/bookworm:20250802
   stage: 20250802_bookworm
@@ -79,29 +79,29 @@ stages:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-bookworm:
-  image: registry.git.coop/webarch/containers/images/bookworm
+20250821_bookworm:
+  image: registry.git.coop/webarch/containers/images/bookworm:20250821
   stage: bookworm
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-jammy:
-  image: registry.git.coop/webarch/containers/images/jammy
+20250821_jammy:
+  image: registry.git.coop/webarch/containers/images/jammy:20250821
   stage: jammy
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-noble:
-  image: registry.git.coop/webarch/containers/images/noble
+20250821_noble:
+  image: registry.git.coop/webarch/containers/images/noble:20250821
   stage: noble
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-trixie:
-  image: registry.git.coop/webarch/containers/images/trixie
+20250821_trixie:
+  image: registry.git.coop/webarch/containers/images/trixie:20250821
   stage: trixie
   script:
     - pre-commit install
