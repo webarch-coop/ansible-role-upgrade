@@ -1,4 +1,4 @@
-# Copyright 2018-2025 Chris Croome
+# Copyright 2018-2026 Chris Croome
 #
 # This file is part of the Webarchitects Upgrade Ansible role.
 #
@@ -14,7 +14,6 @@ variables:
   ANSIBLE_DEFAULT_VERBOSITY: "1"
   ANSIBLE_DIFF_ALWAYS: "1"
   ANSIBLE_DISPLAY_SKIPPED_HOSTS: "0"
-  # ANSIBLE_ERROR_ON_UNDEFINED_VARS: "1"
   ANSIBLE_FORCE_COLOR: "1"
   ANSIBLE_INJECT_FACT_VARS: "0"
   ANSIBLE_NOCOWS: "1"
@@ -22,8 +21,7 @@ variables:
   ANSIBLE_ROLES_PATH: "${CI_PROJECT_DIR}/..:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles"
   ANSIBLE_SHELL_ALLOW_WORLD_READABLE_TEMP: "1"
   DEBIAN_FRONTEND: noninteractive
-  # DEFAULT_MANAGED_STR: "Ansible managed"
-  MOLECULE_VERBOSITY: "0"
+  MOLECULE_VERBOSITY: "1"
   PRE_COMMIT_COLOR: always
   PY_COLORS: "1"
 before_script:
@@ -42,67 +40,59 @@ before_script:
 stages:
   # An older version of containers to test upgrades
   # https://git.coop/webarch/containers#docker-containers
-  - 20250802_bookworm
-  - 20250802_jammy
-  - 20250802_noble
-  - 20250802_trixie
+  - 20260103_bookworm
+  - 20260103_forky
+  - 20260103_noble
+  - 20260103_trixie
   # A recent version of the containers
-  - 20250821_bookworm
-  - 20250821_jammy
-  - 20250821_noble
-  - 20250821_trixie
-20250802_bookworm:
-  image: registry.git.coop/webarch/containers/images/bookworm:20250802
-  stage: 20250802_bookworm
+  - 20260129_bookworm
+  - 20260129_forky
+  - 20260129_noble
+  - 20260129_trixie
+20260103_bookworm:
+  image: registry.git.coop/webarch/containers/images/bookworm:20260103
+  stage: 20260103_bookworm
+  script:
+    - molecule test
+20260103_forky:
+  image: registry.git.coop/webarch/containers/images/forky:20260103
+  stage: 20260103_forky
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-20250802_jammy:
-  image: registry.git.coop/webarch/containers/images/jammy:20250802
-  stage: 20250802_jammy
+20260103_noble:
+  image: registry.git.coop/webarch/containers/images/noble:20260103
+  stage: 20260103_noble
+  script:
+    - molecule test
+20260103_trixie:
+  image: registry.git.coop/webarch/containers/images/trixie:20260103
+  stage: 20260103_trixie
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-20250802_noble:
-  image: registry.git.coop/webarch/containers/images/noble:20250802
-  stage: 20250802_noble
+20260129_bookworm:
+  image: registry.git.coop/webarch/containers/images/bookworm:20260129
+  stage: 20260129_bookworm
+  script:
+    - molecule test
+20260129_forky:
+  image: registry.git.coop/webarch/containers/images/forky:20260129
+  stage: 20260129_forky
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-20250802_trixie:
-  image: registry.git.coop/webarch/containers/images/trixie:20250802
-  stage: 20250802_trixie
+20260129_noble:
+  image: registry.git.coop/webarch/containers/images/noble:20260129
+  stage: 20260129_noble
   script:
-    - pre-commit install
-    - pre-commit run --all-files
     - molecule test
-20250821_bookworm:
-  image: registry.git.coop/webarch/containers/images/bookworm:20250821
-  stage: 20250821_bookworm
-  script:
-    - pre-commit install
-    - pre-commit run --all-files
-    - molecule test
-20250821_jammy:
-  image: registry.git.coop/webarch/containers/images/jammy:20250821
-  stage: 20250821_jammy
-  script:
-    - pre-commit install
-    - pre-commit run --all-files
-    - molecule test
-20250821_noble:
-  image: registry.git.coop/webarch/containers/images/noble:20250821
-  stage: 20250821_noble
-  script:
-    - pre-commit install
-    - pre-commit run --all-files
-    - molecule test
-20250821_trixie:
-  image: registry.git.coop/webarch/containers/images/trixie:20250821
-  stage: 20250821_trixie
+20260129_trixie:
+  image: registry.git.coop/webarch/containers/images/trixie:20260129
+  stage: 20260129_trixie
   script:
     - pre-commit install
     - pre-commit run --all-files
