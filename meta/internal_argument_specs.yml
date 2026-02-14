@@ -133,6 +133,6 @@ argument_specs:
         description: The jc version string.
       upgrade_reboot_elapsed:
         type: dict
-        required: true
+        required: false
         description: Result from running the wait_for_connection module.
 ...
