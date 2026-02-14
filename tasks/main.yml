@@ -314,16 +314,17 @@
 
         - name: A reboot is not required
           ansible.builtin.debug:
-            msg: "{{ upgrade_debug_msg | trim }}"
-          vars:
-            upgrade_debug_msg: >-
-              The running kernel version, {{ upgrade_needrestart_yaml.running_kernel_version }}, is the same as the
-              expected kernel version, {{ upgrade_needrestart_yaml.expected_kernel_version }}, so a reboot is not
-              required.
+            msg: A reboot is not required
+          #   msg: "{{ upgrade_debug_msg | trim }}"
+          # vars:
+          #   upgrade_debug_msg: >-
+          #     The running kernel version, {{ upgrade_needrestart_yaml.running_kernel_version }}, is the same as the
+          #     expected kernel version, {{ upgrade_needrestart_yaml.expected_kernel_version }}, so a reboot is not
+          #     required.
           when: >-
             (upgrade_needrestart_yaml.running_kernel_version is not defined) or
             (upgrade_needrestart_yaml.expected_kernel_version is not defined) or
-            (kernel_status is not defined) or
+            (upgrade_needrestart_yaml.kernel_status is not defined) or
             ((upgrade_needrestart_yaml.running_kernel_version is defined) and
             (upgrade_needrestart_yaml.expected_kernel_version is defined) and
             (upgrade_needrestart_yaml.running_kernel_version == upgrade_needrestart_yaml.expected_kernel_version)) or
@@ -332,12 +333,13 @@
 
         - name: A reboot is required but is to be skipped
           ansible.builtin.debug:
-            msg: "{{ upgrade_debug_msg | trim }}"
-          vars:
-            upgrade_debug_msg: >-
-              {{ upgrade_needrestart_yaml.running_kernel_version }} is the current running kernel and
-              {{ upgrade_needrestart_yaml.expected_kernel_version }} is the expected kernel but upgrade_reboot is
-              {{ upgrade_reboot }} so the reboot tasks are being skipped.
+            msg: A reboot is required but is to be skipped
+          #   msg: "{{ upgrade_debug_msg | trim }}"
+          # vars:
+          #   upgrade_debug_msg: >-
+          #     {{ upgrade_needrestart_yaml.running_kernel_version }} is the current running kernel and
+          #     {{ upgrade_needrestart_yaml.expected_kernel_version }} is the expected kernel but upgrade_reboot is
+          #     {{ upgrade_reboot }} so the reboot tasks are being skipped.
           when:
             - not upgrade_reboot | bool
             - upgrade_needrestart_yaml.running_kernel_version is defined
