@@ -119,4 +119,16 @@ argument_specs:
         type: bool
         required: false
         description: Boolean to indicate that systemd daemon-reexec and daemon-reload need to be run.
+      upgrade_controller_jc_a:
+        type: dict
+        required: false
+        description: Result from running the command module.
+      upgrade_controller_which_jc:
+        type: dict
+        required: false
+        description: Result from running the command module.
+      upgrade_jc:
+        type: str
+        required: false
+        description: The jc version string.
 ...
