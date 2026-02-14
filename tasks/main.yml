@@ -32,8 +32,45 @@
           - ansible_facts.effective_user_id == 0
         quiet: true
 
+    - name: JSON convert, jc, is required in the control node
+      ansible.builtin.command:
+        cmd: which jc
+      check_mode: false
+      become: false
+      delegate_to: localhost
+      changed_when: false
+      register: upgrade_controller_which_jc
+
+    - name: Get jc version on the control node
+      ansible.builtin.command:
+        cmd: jc -a
+      check_mode: false
+      become: false
+      delegate_to: localhost
+      changed_when: false
+      register: upgrade_controller_jc_a
+
+    - name: Set a fact for the control node version
+      ansible.builtin.set_fact:
+        upgrade_jc: "{{ (upgrade_controller_jc_a.stdout | from_json).version }}"
+
+    - name: Debug upgrade_jc
+      ansible.builtin.debug:
+        var: upgrade_jc
+        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
+
+    # https://github.com/kellyjonbrazil/jc/issues/339#issuecomment-2016643518
+    - name: Needrestart parsing requires jc >= 1.25.2
+      ansible.builtin.assert:
+        that:
+          - upgrade_jc is ansible.builtin.version('1.25.2', '>=')
+        quiet: true
+
     - name: Check if system has been booted with systemd as init system
-      ansible.builtin.command: ps -p 1 -o comm=
+      ansible.builtin.command:
+        cmd: 'ps -p 1 -o comm='
       environment:
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
       changed_when: false
@@ -158,7 +195,8 @@
       block:
 
         - name: Run needrestart
-          ansible.builtin.command: /usr/sbin/needrestart -b
+          ansible.builtin.command:
+            cmd: /usr/sbin/needrestart -b
           environment:
             PATH: /usr/sbin:/usr/bin:/sbin:/bin
           check_mode: false
@@ -172,44 +210,30 @@
           tags:
             - debug
 
-        - name: "Debug upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]')"
-          ansible.builtin.debug:
-            msg: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') }}"
-            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-          tags:
-            - debug
+#        - name: "Debug upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]')"
+#          ansible.builtin.debug:
+#            msg: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') }}"
+#            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+#          tags:
+#            - debug
+#
+#        - name: "Debug upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$')"
+#          ansible.builtin.debug:
+#            msg: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') }}"
+#            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+#          tags:
+#            - debug
+#
+#        - name: "Debug upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') | map('regex_replace', '^NEEDRESTART-SVC: ')"
+#          ansible.builtin.debug:
+#            msg: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') | map('regex_replace', '^NEEDRESTART-SVC: ') }}"
+#            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+#          tags:
+#            - debug
 
-        - name: "Debug upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$')"
-          ansible.builtin.debug:
-            msg: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') }}"
-            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-          tags:
-            - debug
-
-        - name: "Debug upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') | map('regex_replace', '^NEEDRESTART-SVC: ')"
-          ansible.builtin.debug:
-            msg: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', ' systemd-manager$') | map('regex_replace', '^NEEDRESTART-SVC: ') }}"
-            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-          tags:
-            - debug
-
-        - name: Set facts for needrestart YAML output and services that need restarting and systemd daemon-reexec
+        - name: Set fact for needrestart YAML
           ansible.builtin.set_fact:
-            # Note that the JC ini parser results in a max of one service being listed see https://github.com/kellyjonbrazil/jc/issues/339
-            upgrade_needrestart_yaml: "{{ upgrade_needrestart_cmd.stdout | string | community.general.jc('ini') }}"
-            upgrade_services: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', '[.]service$') | map('regex_replace', '^NEEDRESTART-SVC: ') | ansible.builtin.difference(upgrade_restart_skip) | reject('regex', upgrade_restart_skip_regex) }}"
-            upgrade_systemd_daemon_reexec: >-
-              {%- if (upgrade_needrestart_cmd.stdout_lines |
-                    select('regex', '^NEEDRESTART-SVC[:]') |
-                    select('regex', ' systemd-manager$') |
-                    map('regex_replace', '^NEEDRESTART-SVC: ')) == [] -%}
-              {{- upgrade_systemd_daemon_reexec_false -}}
-              {%- else -%}
-              {{- upgrade_systemd_daemon_reexec_true -}}
-              {%- endif -%}
-          vars:
-            upgrade_systemd_daemon_reexec_false: false
-            upgrade_systemd_daemon_reexec_true: true
+            upgrade_needrestart_yaml: "{{ upgrade_needrestart_cmd.stdout | string | community.general.jc('needrestart') }}"
 
         - name: Debug upgrade_needrestart_yaml
           ansible.builtin.debug:
@@ -217,6 +241,19 @@
             verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
           tags:
             - debug
+
+        - name: Set facts for needrestart services that need restarting and systemd daemon-reexec
+          ansible.builtin.set_fact:
+            upgrade_services: "{{ upgrade_needrestart_yaml.service | ansible.builtin.difference(upgrade_restart_skip) | reject('regex', upgrade_restart_skip_regex) }}"
+            upgrade_systemd_daemon_reexec: >-
+              {%- if ("systemd-manager" in upgrade_needrestart_yaml.service) -%}
+              {{- upgrade_systemd_daemon_reexec_true -}}
+              {%- else -%}
+              {{- upgrade_systemd_daemon_reexec_false -}}
+              {%- endif -%}
+          vars:
+            upgrade_systemd_daemon_reexec_false: false
+            upgrade_systemd_daemon_reexec_true: true
 
         - name: Debug upgrade_services
           ansible.builtin.debug:
@@ -244,10 +281,10 @@
         #       {%- elif upgrade_services == [] %} no services require a restart
         #       {%- elif not upgrade_systemd_daemon_reexec | bool %} a systemd daemon-reexec is not required{%- endif -%}
         #   when: >-
-        #     ( not upgrade_restart | bool ) or
-        #     ( upgrade_reboot | bool and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3" ) or
-        #     ( upgrade_services == [] ) or
-        #     ( not upgrade_systemd_daemon_reexec | bool )
+        #     (not upgrade_restart | bool) or
+        #     (upgrade_reboot | bool and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3") or
+        #     (upgrade_services == []) or
+        #     (not upgrade_systemd_daemon_reexec | bool)
 
         - name: Restart services
           block:
@@ -266,35 +303,34 @@
               ansible.builtin.include_tasks: restart.yml
 
           when:
-            - ( not upgrade_reboot | bool ) or ( upgrade_needrestart_yaml['NEEDRESTART-KSTA'] != "3" )
+            - (not upgrade_reboot | bool) or (upgrade_needrestart_yaml.kernel_status != "3")
             - upgrade_restart | bool
-            - ( upgrade_services != [] ) or ( upgrade_systemd_daemon_reexec | bool )
+            - (upgrade_services != []) or (upgrade_systemd_daemon_reexec | bool)
 
         - name: A reboot is not required
           ansible.builtin.debug:
             msg: "{{ upgrade_debug_msg | trim }}"
           vars:
             upgrade_debug_msg: >-
-              The running kernel
-              {% if upgrade_needrestart_yaml['NEEDRESTART-KCUR'] is defined %}{{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }}{% endif %}
-              is the latest so a reboot is not required
-          when: >-
-            ( upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is not defined ) or
-            ( ( upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined ) and
-            ( upgrade_needrestart_yaml['NEEDRESTART-KSTA'] != "3" ) )
+              The running kernel version, {{ upgrade_needrestart_yaml.running_kernel_version }}, is the same as the
+              expected kernel version, {{ upgrade_needrestart_yaml.expected_kernel_version }}, so a reboot is not
+              required.
+          when:
+            - upgrade_needrestart_yaml.running_kernel_version == upgrade_needrestart_yaml.expected_kernel_version
+            - upgrade_needrestart_yaml.kernel_status != 3
 
         - name: A reboot is required but is to be skipped
           ansible.builtin.debug:
             msg: "{{ upgrade_debug_msg | trim }}"
           vars:
             upgrade_debug_msg: >-
-              {{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }} is the current running kernel and
-              {{ upgrade_needrestart_yaml['NEEDRESTART-KEXP'] }} is the expected kernel
-              but upgrade_reboot is {{ upgrade_reboot }} so the reboot tasks are being skipped
+              {{ upgrade_needrestart_yaml.running_kernel_version }} is the current running kernel and
+              {{ upgrade_needrestart_yaml.expected_kernel_version }} is the expected kernel but upgrade_reboot is
+              {{ upgrade_reboot }} so the reboot tasks are being skipped.
           when:
             - not upgrade_reboot | bool
-            - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined
-            - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3"
+            - upgrade_needrestart_yaml.running_kernel_version == upgrade_needrestart_yaml.expected_kernel_version
+            - upgrade_needrestart_yaml.kernel_status == 3
 
         - name: Reboot server
           block:
@@ -305,16 +341,16 @@
               vars:
                 upgrade_debug_msg: >-
                   Including the reboot server tasks as the upgrade_reboot variable is set to {{ upgrade_reboot }} and
-                  {{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }} is the current running kernel and
-                  {{ upgrade_needrestart_yaml['NEEDRESTART-KEXP'] }} is the expected kernel
+                  {{ upgrade_needrestart_yaml.running_kernel_version }} is the current running kernel and
+                  {{ upgrade_needrestart_yaml.expected_kernel_version }} is the expected kernel.
 
             - name: Include the reboot tasks
               ansible.builtin.include_tasks: reboot.yml
 
           when:
             - upgrade_reboot | bool
-            - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined
-            - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3"
+            - upgrade_needrestart_yaml.running_kernel_version != upgrade_needrestart_yaml.expected_kernel_version
+            - upgrade_needrestart_yaml.kernel_status == 3
 
       when:
         - upgrade_needrestart_bin.stat.exists | bool

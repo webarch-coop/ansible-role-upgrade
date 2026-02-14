@@ -34,4 +34,89 @@ argument_specs:
         type: str
         required: false
         description: Internal variable for the results of a lookup for the internal argument spec.
+      upgrade_apt_check:
+        type: dict
+        required: false
+        description: Result from running the apt module.
+      upgrade_changelog_date:
+        type: str
+        required: false
+        description: Date.
+      upgrade_changelog_path:
+        type: str
+        required: false
+        description: Path.
+      upgrade_changelog_time:
+        type: str
+        required: false
+        description: Time.
+      upgrade_changelog_user:
+        type: str
+        required: false
+        description: User.
+      upgrade_chroot_apt_path:
+        type: str
+        required: false
+        description: Path.
+      upgrade_chroot_etc_debian_version:
+        type: str
+        required: false
+        description: Debian version.
+      upgrade_chroot_path:
+        type: str
+        required: false
+        description: Path.
+      upgrade_dist_apt_autoremove:
+        type: dict
+        required: false
+        description: Result from running the command module.
+      upgrade_dist_apt_clean:
+        type: dict
+        required: false
+        description: Result from running the apt module.
+      upgrade_dist_upgrade:
+        type: dict
+        required: false
+        description: Result from running the apt module.
+      upgrade_init:
+        type: str
+        required: false
+        description: Init system.
+        choices:
+          - chroot
+          - systemd
+      upgrade_munin_plugin_apt_all:
+        type: dict
+        required: false
+        description: Result from running the stat module.
+      upgrade_needrestart_bin:
+        type: dict
+        required: false
+        description: Result from running the stat module.
+      upgrade_needrestart_cmd:
+        type: dict
+        required: false
+        description: Result from running the command module.
+      upgrade_needrestart_yaml:
+        type: dict
+        required: false
+        description: Output from needrestart -b converted into JSON by jc --needrestart.
+      upgrade_pkgs:
+        type: list
+        elements: str
+        required: false
+        description: List of packages to upgrade.
+      upgrade_ps:
+        type: dict
+        required: false
+        description: Result from running the command module.
+      upgrade_services:
+        type: list
+        elements: str
+        required: false
+        description: List of services that need restarting.
+      upgrade_systemd_daemon_reexec:
+        type: bool
+        required: false
+        description: Boolean to indicate that systemd daemon-reexec and daemon-reload need to be run.
 ...

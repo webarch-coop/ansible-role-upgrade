@@ -17,15 +17,15 @@
         - name: Rebooting
           ansible.builtin.debug:
             msg:
-              - "{{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }} is the current running kernel"
-              - "{{ upgrade_needrestart_yaml['NEEDRESTART-KEXP'] }} is the expected kernel, rebooting"
+              - "{{ upgrade_needrestart_yaml.running_kernel_version }} is the current running kernel"
+              - "{{ upgrade_needrestart_yaml.expected_kernel_version }} is the expected kernel, rebooting"
 
-        - name: Reboot when NEEDRESTART-KSTA is 3
+        - name: Reboot
           ansible.builtin.reboot:
 
       when:
-        - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined
-        - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3"
+        - upgrade_needrestart_yaml.kernel_status is defined
+        - upgrade_needrestart_yaml.kernel_status == 3
 
   tags:
     - upgrade

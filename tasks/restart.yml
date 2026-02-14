@@ -29,11 +29,11 @@
     - name: A reboot is required but it is being skipped for now
       ansible.builtin.debug:
         msg:
-          - "{{ upgrade_needrestart_yaml['NEEDRESTART-KCUR'] }} is the current running kernel"
-          - "{{ upgrade_needrestart_yaml['NEEDRESTART-KEXP'] }} is the expected kernel"
+          - "{{ upgrade_needrestart_yaml.running_kernel_version }} is the current running kernel"
+          - "{{ upgrade_needrestart_yaml.expected_kernel_version }} is the expected kernel"
       when:
-        - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined
-        - upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3"
+        - upgrade_needrestart_yaml.kernel_status is defined
+        - upgrade_needrestart_yaml.kernel_status == 3
 
   tags:
     - upgrade
