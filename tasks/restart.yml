@@ -12,13 +12,13 @@
   block:
 
     - name: Systemd daemon-reexec
-      ansible.builtin.systemd:
+      ansible.builtin.systemd_service:
         daemon_reexec: true
         daemon_reload: true
       when: upgrade_systemd_daemon_reexec | bool
 
     - name: Restart systemd services
-      ansible.builtin.systemd:
+      ansible.builtin.systemd_service:
         name: "{{ upgrade_service }}"
         state: restarted
       loop: "{{ upgrade_services }}"

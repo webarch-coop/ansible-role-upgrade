@@ -1,0 +1,50 @@
+# Copyright 2018-2026 Chris Croome
+#
+# This file is part of the Webarchitects Upgrade Ansible role.
+#
+# The Webarchitects Upgrade Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Upgrade Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Upgrade Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Verify upgrade variables
+  block:
+
+    - name: Debug upgradevarnames
+      ansible.builtin.debug:
+        var: upgradevarnames
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+      tags:
+        - debug
+
+    - name: Debug upgradehostvars
+      ansible.builtin.debug:
+        var: upgradehostvars
+        verbosity: "{% if ansible_check_mode | bool or ansible_diff_mode | bool %}1{% else %}2{% endif %}"
+      tags:
+        - debug
+
+    - name: Set a fact for the argument spec and internal argument spec
+      ansible.builtin.set_fact:
+        upgrade_argument_spec: "{{ upgrade_argument_spec_lookup | ansible.builtin.from_yaml }}"
+        upgrade_internal_argument_spec: "{{ upgrade_internal_argument_spec_lookup | ansible.builtin.from_yaml }}"
+      vars:
+        upgrade_argument_spec_lookup: "{{ lookup('ansible.builtin.file', 'meta/argument_specs.yml', errors='strict') }}"
+        upgrade_internal_argument_spec_lookup: "{{ lookup('ansible.builtin.file', 'meta/internal_argument_specs.yml', errors='strict') }}"
+
+    - name: Set a fact for the combined argument spec and internal argument spec
+      ansible.builtin.set_fact:
+        upgrade_combined_argument_spec: "{{ upgrade_argument_spec | ansible.builtin.combine(upgrade_internal_argument_spec, recursive=true) }}"
+
+    - name: Check upgrade_ variables using the combined argument spec
+      ansible.builtin.validate_argument_spec:
+        argument_spec: "{{ upgrade_combined_argument_spec['argument_specs']['main']['options'] }}"
+        provided_arguments: "{{ upgradehostvars }}"
+
+  when:
+    - upgrade_verify is defined
+    - upgrade_verify | bool
+  tags:
+    - upgrade
+...

@@ -10,15 +10,17 @@
 ---
 dependency:
   name: galaxy
+  options:
+    force: true
 platforms:
   - name: instance
 provisioner:
   name: ansible
   config_options:
     defaults:
-      ansible_managed: Ansible managed
+      callback_result_format: yaml
       duplicate_dict_key: error
-      error_on_undefined_vars: true
+      force_color: true
       inject_facts_as_vars: false
   options:
     D: true

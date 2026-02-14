@@ -30,9 +30,9 @@
       ansible.builtin.debug:
         var: ansible_facts.user_dir
 
-    - name: Include role as root
+    - name: Include upgrade role
       ansible.builtin.include_role:
-        name: "{{ lookup('ansible.builtin.env', 'CI_PROJECT_NAME') }}"
+        name: upgrade
       vars:  # noqa var-naming[no-role-prefix]
         upgrade: true
         upgrade_reboot: false
@@ -41,4 +41,9 @@
           - bash.service
           - dbus.service
           # - systemd-logind.service
+
+    - name: Include upgrade role verify argument spec tasks
+      ansible.builtin.include_role:
+        name: upgrade
+        tasks_from: verify.yml
 ...

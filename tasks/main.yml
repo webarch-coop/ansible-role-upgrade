@@ -18,6 +18,14 @@
 - name: Update and upgrade Debian
   block:
 
+    - name: Include upgrade verify variables tasks
+      ansible.builtin.include_tasks: verify.yml
+      when:
+        - upgrade_verify is defined
+        - upgrade_verify | bool
+      tags:
+        - upgrade_verify
+
     - name: This role needs to be run as root
       ansible.builtin.assert:
         that:
@@ -92,12 +100,19 @@
       changed_when: false
       register: upgrade_apt_check
 
-    - name: Set a fact for the available updates
+    - name: Set a fact when there are available updates
       ansible.builtin.set_fact:
         upgrade_pkgs: "{{ upgrade_apt_check.stdout_lines | select('regex', '^Inst[ ].*') | map('regex_replace', '^Inst ') | map('regex_replace', '[ ].*$') | sort }}"
       when:
         - upgrade_apt_check.stdout_lines is defined
         - upgrade_apt_check.stdout_lines != []
+
+    - name: Set a fact when there are no available updates
+      ansible.builtin.set_fact:
+        upgrade_pkgs: []
+      when: >-
+        (upgrade_apt_check.stdout_lines is not defined) or
+        (upgrade_apt_check.stdout_lines == [])
 
     - name: Include the upgrade tasks
       ansible.builtin.include_tasks: upgrade.yml
@@ -178,20 +193,23 @@
           tags:
             - debug
 
-        - name: Set facts for needrestart, services that need restarting and systemd daemon-reexec
+        - name: Set facts for needrestart YAML output and services that need restarting and systemd daemon-reexec
           ansible.builtin.set_fact:
             # Note that the JC ini parser results in a max of one service being listed see https://github.com/kellyjonbrazil/jc/issues/339
             upgrade_needrestart_yaml: "{{ upgrade_needrestart_cmd.stdout | string | community.general.jc('ini') }}"
             upgrade_services: "{{ upgrade_needrestart_cmd.stdout_lines | select('regex', '^NEEDRESTART-SVC[:]') | select('regex', '[.]service$') | map('regex_replace', '^NEEDRESTART-SVC: ') | ansible.builtin.difference(upgrade_restart_skip) | reject('regex', upgrade_restart_skip_regex) }}"
             upgrade_systemd_daemon_reexec: >-
-              {% if (upgrade_needrestart_cmd.stdout_lines |
+              {%- if (upgrade_needrestart_cmd.stdout_lines |
                     select('regex', '^NEEDRESTART-SVC[:]') |
                     select('regex', ' systemd-manager$') |
-                    map('regex_replace', '^NEEDRESTART-SVC: ')) == [] %}false{% else %}{{
-                    upgrade_needrestart_cmd.stdout_lines |
-                    select('regex', '^NEEDRESTART-SVC[:]') |
-                    select('regex', ' systemd-manager$') |
-                    map('regex_replace', '^NEEDRESTART-SVC: ') | bool }}{% endif %}
+                    map('regex_replace', '^NEEDRESTART-SVC: ')) == [] -%}
+              {{- upgrade_systemd_daemon_reexec_false -}}
+              {%- else -%}
+              {{- upgrade_systemd_daemon_reexec_true -}}
+              {%- endif -%}
+          vars:
+            upgrade_systemd_daemon_reexec_false: false
+            upgrade_systemd_daemon_reexec_true: true
 
         - name: Debug upgrade_needrestart_yaml
           ansible.builtin.debug:

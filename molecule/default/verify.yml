@@ -47,7 +47,7 @@
 
         - name: Decode the base64 encoded version of the changelog, split it by lines and set an array  # noqa: no-tabs
           ansible.builtin.set_fact:
-            molecule_changelog: "{{ ( molecule_changelog_b64encoded['content'] | b64decode | trim | regex_replace('\t', '        ') ).split('\n') }}"
+            molecule_changelog: "{{ (molecule_changelog_b64encoded['content'] | b64decode | trim | regex_replace('\t', '        ')).split('\n') }}"
 
         - name: Print the Changelog contents
           ansible.builtin.debug:
@@ -78,5 +78,4 @@
         that:
           - molecule_backup_path is regex('^[/]root[/][.]Changelog[/]Changelog[.].*[.gz]')
       when: molecule_backup_path | length > 0
-
 ...

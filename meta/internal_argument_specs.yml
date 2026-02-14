@@ -14,37 +14,24 @@ argument_specs:
     description: Ansible role for upgrading Debian servers.
     short_description: The main entry point for the upgrade role.
     options:
-      upgrade:
-        type: bool
-        required: true
-        description: Run the tasks in this role.
-      upgrade_changelog:
-        type: bool
-        required: true
-        description: Write updates to /root/Changelog.
-      upgrade_chroot:
+      upgrade_argument_spec:
+        type: dict
+        required: false
+        description: Internal variable for the argument spec.
+      upgrade_argument_spec_lookup:
         type: str
         required: false
-        description: A path to a chroot that should be upgraded.
-      upgrade_reboot:
-        type: bool
+        description: Internal variable for the results of a lookup for the argument spec.
+      upgrade_combined_argument_spec:
+        type: dict
         required: false
-        description: Reboot when required.
-      upgrade_restart:
-        type: bool
+        desciption: Internal variable for the combined argument spec.
+      upgrade_internal_argument_spec:
+        type: dict
         required: false
-        description: Restart services when required.
-      upgrade_restart_skip:
-        type: list
-        elements: str
-        required: true
-        description: A list of services that should not be restarted.
-      upgrade_restart_skip_regex:
+        description: Internal variable for the internal argument spec.
+      upgrade_internal_argument_spec_lookup:
         type: str
-        required: true
-        description: A regular expression to match service names that should not be restarted."
-      upgrade_verify:
-        type: bool
-        required: true
-        description: Verify all variables starting with upgrade underscore using the argument spec.
+        required: false
+        description: Internal variable for the results of a lookup for the internal argument spec.
 ...
