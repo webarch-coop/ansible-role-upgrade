@@ -244,7 +244,7 @@
 
         - name: Set facts for needrestart services that need restarting and systemd daemon-reexec
           ansible.builtin.set_fact:
-            upgrade_services: "{{ upgrade_needrestart_yaml.service | ansible.builtin.difference(upgrade_restart_skip) | reject('regex', upgrade_restart_skip_regex) }}"
+            upgrade_services: "{{ upgrade_needrestart_yaml.service | ansible.builtin.difference(upgrade_restart_skip) | reject('regex', upgrade_restart_skip_regex) | reject('systemd-manager') }}"
             upgrade_systemd_daemon_reexec: >-
               {%- if ("systemd-manager" in upgrade_needrestart_yaml.service) -%}
               {{- upgrade_systemd_daemon_reexec_true -}}
