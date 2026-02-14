@@ -242,18 +242,40 @@
           tags:
             - debug
 
-        - name: Set facts for needrestart services that need restarting and systemd daemon-reexec
-          ansible.builtin.set_fact:
-            upgrade_services: "{{ upgrade_needrestart_yaml.service | ansible.builtin.difference(upgrade_restart_skip) | reject('regex', upgrade_restart_skip_regex) | reject('regex', '^systemd-manager$') }}"
-            upgrade_systemd_daemon_reexec: >-
-              {%- if ("systemd-manager" in upgrade_needrestart_yaml.service) -%}
-              {{- upgrade_systemd_daemon_reexec_true -}}
-              {%- else -%}
-              {{- upgrade_systemd_daemon_reexec_false -}}
-              {%- endif -%}
-          vars:
-            upgrade_systemd_daemon_reexec_false: false
-            upgrade_systemd_daemon_reexec_true: true
+        - name: Set facts when services need restarting
+          block:
+
+            - name: Set fact for services that need restarting
+              ansible.builtin.set_fact:
+                upgrade_services: "{{ upgrade_needrestart_yaml.service | ansible.builtin.difference(upgrade_restart_skip) | reject('regex', upgrade_restart_skip_regex) | reject('regex', '^systemd-manager$') }}"
+
+            - name: Set fact for systemd daemon-reexec
+              ansible.builtin.set_fact:
+                upgrade_systemd_daemon_reexec: >-
+                  {%- if ("systemd-manager" in upgrade_needrestart_yaml.service) -%}
+                  {{- upgrade_systemd_daemon_reexec_true -}}
+                  {%- else -%}
+                  {{- upgrade_systemd_daemon_reexec_false -}}
+                  {%- endif -%}
+              vars:
+                upgrade_systemd_daemon_reexec_false: false
+                upgrade_systemd_daemon_reexec_true: true
+
+          when:
+            - upgrade_needrestart_yaml.service is defined
+            - upgrade_needrestart_yaml.service != []
+
+        - name: Set facts when services do not need restarting
+          block:
+
+            - name: Set facts for services that need restarting and systemd daemon-reexec
+              ansible.builtin.set_fact:
+                upgrade_services: []
+                upgrade_systemd_daemon_reexec: false
+
+          when: >-
+            (upgrade_needrestart_yaml.service is not defined) or
+            (upgrade_needrestart_yaml.service == [])
 
         - name: Debug upgrade_services
           ansible.builtin.debug:
@@ -268,23 +290,6 @@
             verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
           tags:
             - debug
-
-        # This generates false positives
-        # - name: No services are to be restarted  # noqa: jinja[spacing]
-        #   ansible.builtin.debug:
-        #     msg: "{{ upgrade_debug_msg | trim }}"
-        #   vars:
-        #     upgrade_debug_msg: >-
-        #       The restart services tasks are being skipped because
-        #       {%- if not upgrade_restart | bool %} upgrade_restart is False
-        #       {%- elif upgrade_reboot | bool and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3" %} the server is to be rebooted
-        #       {%- elif upgrade_services == [] %} no services require a restart
-        #       {%- elif not upgrade_systemd_daemon_reexec | bool %} a systemd daemon-reexec is not required{%- endif -%}
-        #   when: >-
-        #     (not upgrade_restart | bool) or
-        #     (upgrade_reboot | bool and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] is defined and upgrade_needrestart_yaml['NEEDRESTART-KSTA'] == "3") or
-        #     (upgrade_services == []) or
-        #     (not upgrade_systemd_daemon_reexec | bool)
 
         - name: Restart services
           block:
