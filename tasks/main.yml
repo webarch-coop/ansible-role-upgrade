@@ -324,8 +324,11 @@
             (upgrade_needrestart_yaml.running_kernel_version is not defined) or
             (upgrade_needrestart_yaml.expected_kernel_version is not defined) or
             (kernel_status is not defined) or
-            (upgrade_needrestart_yaml.running_kernel_version == upgrade_needrestart_yaml.expected_kernel_version) or
-            (upgrade_needrestart_yaml.kernel_status != 3)
+            ((upgrade_needrestart_yaml.running_kernel_version is defined) and
+            (upgrade_needrestart_yaml.expected_kernel_version is defined) and
+            (upgrade_needrestart_yaml.running_kernel_version == upgrade_needrestart_yaml.expected_kernel_version)) or
+            ((upgrade_needrestart_yaml.kernel_status is defined) and
+            (upgrade_needrestart_yaml.kernel_status != 3))
 
         - name: A reboot is required but is to be skipped
           ansible.builtin.debug:
@@ -340,8 +343,11 @@
             - upgrade_needrestart_yaml.running_kernel_version is defined
             - upgrade_needrestart_yaml.expected_kernel_version is defined
             - upgrade_needrestart_yaml.kernel_status is defined
-            - upgrade_needrestart_yaml.running_kernel_version == upgrade_needrestart_yaml.expected_kernel_version
-            - upgrade_needrestart_yaml.kernel_status == 3
+            - >-
+              ((upgrade_needrestart_yaml.running_kernel_version is defined) and
+              (upgrade_needrestart_yaml.expected_kernel_version is defined) and
+              (upgrade_needrestart_yaml.running_kernel_version == upgrade_needrestart_yaml.expected_kernel_version))
+            - ((upgrade_needrestart_yaml.kernel_status is defined) and (upgrade_needrestart_yaml.kernel_status == 3))
 
         - name: Reboot server
           block:
@@ -363,8 +369,11 @@
             - upgrade_needrestart_yaml.running_kernel_version is defined
             - upgrade_needrestart_yaml.expected_kernel_version is defined
             - upgrade_needrestart_yaml.kernel_status is defined
-            - upgrade_needrestart_yaml.running_kernel_version != upgrade_needrestart_yaml.expected_kernel_version
-            - upgrade_needrestart_yaml.kernel_status == 3
+            - >-
+              ((upgrade_needrestart_yaml.running_kernel_version is defined) and
+              (upgrade_needrestart_yaml.expected_kernel_version is defined) and
+              (upgrade_needrestart_yaml.running_kernel_version != upgrade_needrestart_yaml.expected_kernel_version))
+            - ((upgrade_needrestart_yaml.kernel_status is defined) and (upgrade_needrestart_yaml.kernel_status == 3))
 
       when:
         - upgrade_needrestart_bin.stat.exists | bool
