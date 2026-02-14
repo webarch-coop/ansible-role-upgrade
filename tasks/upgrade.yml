@@ -93,6 +93,7 @@
               sed -i "1 i\
               {{ upgrade_changelog_date }}\t{{ upgrade_changelog_user }}\
               \n\t*\t{{ upgrade_pkgs | join(' ') }} : updated\n" /root/Changelog
+            executable: "{{ ansible_facts.ansible_local.bash.path }}"
           environment:
             PATH: /usr/sbin:/usr/bin:/sbin:/bin
           changed_when: true
@@ -110,7 +111,7 @@
         state: restarted
       when:
         - upgrade_pkgs is defined
-        - ( "docker-ce" in upgrade_pkgs )
+        - ("docker-ce" in upgrade_pkgs)
 
     - name: Check the existance of /etc/munin/plugins/apt_all
       ansible.builtin.stat:
