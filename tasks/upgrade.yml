@@ -34,7 +34,8 @@
       when: upgrade_dist_upgrade.stdout_lines is defined
 
     - name: Apt autoremove
-      ansible.builtin.command: apt autoremove -y
+      ansible.builtin.command:
+        cmd: apt autoremove -y
       environment:
         DEBIAN_FRONTEND: noninteractive
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
@@ -65,20 +66,6 @@
       tags:
         - debug
 
-    # This doesn't work, see https://git.coop/webarch/upgrade/-/issues/2
-    # - name: Set a fact for the names of the packages upgraded
-    #   ansible.builtin.set_fact:
-    #     upgrade_dist_upgraded: "{{ upgrade_dist_upgrade.stdout | split('\n') | select('regex', '^[ ]{2}') | map('regex_replace', '^[ ]{2}') }}"
-    #   when: upgrade_dist_upgrade is defined
-
-    # - name: Debug the names of the packages upgraded
-    #   ansible.builtin.debug:
-    #     var: upgrade_dist_upgraded
-    #     verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
-    #   when:
-    #     - upgrade_dist_upgraded is defined
-    #     - upgrade_dist_upgraded != []
-
     - name: Update the Changelog
       block:
 
@@ -100,10 +87,12 @@
         # TODO strip everything after a colon from package names see https://askubuntu.com/a/1262555
         # to avoid entries like this linux-image-6.1.0-10-amd64:amd64/bookworm
         - name: Write the Changelog update  # noqa: command-instead-of-module
-          ansible.builtin.shell: |-
-            sed -i "1 i\
-            {{ upgrade_changelog_date }}\t{{ upgrade_changelog_user }}\
-            \n\t*\t{{ upgrade_pkgs | join(' ') }} : updated\n" /root/Changelog
+          ansible.builtin.shell:
+            cmd: |-
+              set -e -o pipefail
+              sed -i "1 i\
+              {{ upgrade_changelog_date }}\t{{ upgrade_changelog_user }}\
+              \n\t*\t{{ upgrade_pkgs | join(' ') }} : updated\n" /root/Changelog
           environment:
             PATH: /usr/sbin:/usr/bin:/sbin:/bin
           changed_when: true
@@ -122,12 +111,6 @@
       when:
         - upgrade_pkgs is defined
         - ( "docker-ce" in upgrade_pkgs )
-
-    - name: Include OpenProject tasks
-      ansible.builtin.include_tasks: op.yml
-      when:
-        - upgrade_pkgs is defined
-        - ( "openproject" in upgrade_pkgs )
 
     - name: Check the existance of /etc/munin/plugins/apt_all
       ansible.builtin.stat:

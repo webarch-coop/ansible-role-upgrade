@@ -8,26 +8,9 @@
 #
 # You should have received a copy of the GNU General Public License along with the Webarchitects Upgrade Ansible role. If not, see <https://www.gnu.org/licenses/>.
 ---
-- name: Upgrade OpenProject
-  block:
-
-    - name: Rebooting prior to OpenProject update
-      ansible.builtin.reboot:
-        post_reboot_delay: 10
-
-    - name: Reconfigure OpenProject block
-      block:
-
-        - name: Reconfigure OpenProject
-          ansible.builtin.command: openproject configure
-          changed_when: true
-
-      rescue:
-
-        - name: 2nd attempt to Reconfigure OpenProject
-          ansible.builtin.command: openproject configure
-          changed_when: true
-
-  tags:
-    - upgrade
+- name: apt
+  src: https://git.coop/webarch/apt.git
+  # https://git.coop/webarch/apt/-/releases
+  version: 4.13.0  # apt
+  scm: git
 ...

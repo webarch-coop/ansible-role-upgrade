@@ -1,0 +1,95 @@
+# Copyright 2018-2026 Chris Croome
+#
+# This file is part of the Webarchitects Upgrade Ansible role.
+#
+# The Webarchitects Upgrade Ansible role is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+#
+# The Webarchitects Upgrade Ansible role is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with the Webarchitects Upgrade Ansible role. If not, see <https://www.gnu.org/licenses/>.
+---
+- name: Upgrade checks
+  block:
+
+    - name: This role needs to be run as root
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.effective_user_id == 0
+        quiet: true
+
+    - name: JSON convert, jc, is required in the control node
+      ansible.builtin.command:
+        cmd: which jc
+      check_mode: false
+      become: false
+      delegate_to: localhost
+      changed_when: false
+      register: upgrade_controller_which_jc
+
+    - name: Get jc version on the control node
+      ansible.builtin.command:
+        cmd: jc -a
+      check_mode: false
+      become: false
+      delegate_to: localhost
+      changed_when: false
+      register: upgrade_controller_jc_a
+
+    - name: Set a fact for the control node version
+      ansible.builtin.set_fact:
+        upgrade_jc: "{{ (upgrade_controller_jc_a.stdout | from_json).version }}"
+
+    - name: Debug upgrade_jc
+      ansible.builtin.debug:
+        var: upgrade_jc
+        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
+
+    # https://github.com/kellyjonbrazil/jc/issues/339#issuecomment-2016643518
+    - name: Needrestart parsing requires jc >= 1.25.2
+      ansible.builtin.assert:
+        that:
+          - upgrade_jc is ansible.builtin.version('1.25.2', '>=')
+        quiet: true
+
+    - name: Check if system has been booted with systemd as init system
+      ansible.builtin.command:
+        cmd: 'ps -p 1 -o comm='
+      environment:
+        PATH: /usr/sbin:/usr/bin:/sbin:/bin
+      changed_when: false
+      check_mode: false
+      register: upgrade_ps
+      failed_when: upgrade_ps.rc is not regex('^0|47$')
+
+    - name: Set a fact for the init system
+      ansible.builtin.set_fact:
+        upgrade_init: "{{ upgrade_ps.stdout }}"
+      when:
+        - upgrade_ps.stdout is defined
+        - upgrade_ps.rc == 0
+
+    - name: When the exit code is 47 assume is is because this is a chroot
+      ansible.builtin.set_fact:
+        upgrade_init: chroot
+      when:
+        - upgrade_ps.stdout is defined
+        - upgrade_ps.rc == 47
+
+    - name: Debug the ini system
+      ansible.builtin.debug:
+        var: upgrade_init
+        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
+
+    - name: The init system is not defined
+      ansible.builtin.assert:
+        that:
+          - upgrade_init is defined
+        quiet: true
+
+  tags:
+    - upgrade
+...

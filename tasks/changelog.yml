@@ -72,7 +72,7 @@
             path: /root/Changelog
           register: upgrade_changelog_path
 
-      when: not upgrade_changelog_path.stat.exists
+      when: not upgrade_changelog_path.stat.exists | bool
 
   tags:
     - upgrade

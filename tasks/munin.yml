@@ -27,8 +27,8 @@
       block:
 
         - name: Check the Munin apt_all plugin output  # noqa: no-handler
-          ansible.builtin.command: munin-run apt_all
-          args:
+          ansible.builtin.command:
+            cmd: munin-run apt_all
             chdir: /etc/munin/plugins
           environment:
             PATH: /usr/sbin:/usr/bin:/sbin:/bin
@@ -37,8 +37,8 @@
           changed_when: false
 
       when: >-
-        ( upgrade_apt_state.changed | bool ) or
-        ( upgrade_apt_all_state.changed | bool )
+        (upgrade_apt_state.changed | bool) or
+        (upgrade_apt_all_state.changed | bool)
 
   tags:
     - upgrade
