@@ -40,39 +40,15 @@ before_script:
 stages:
   # An older version of containers to test upgrades
   # https://git.coop/webarch/containers#docker-containers
-  - 20260103_bookworm
-  - 20260103_forky
-  - 20260103_noble
-  - 20260103_trixie
-  # A recent version of the containers
   - 20260129_bookworm
   - 20260129_forky
   - 20260129_noble
   - 20260129_trixie
-20260103_bookworm:
-  image: registry.git.coop/webarch/containers/images/bookworm:20260103
-  stage: 20260103_bookworm
-  script:
-    - molecule test
-20260103_forky:
-  image: registry.git.coop/webarch/containers/images/forky:20260103
-  stage: 20260103_forky
-  script:
-    - pre-commit install
-    - pre-commit run --all-files
-    - molecule test
-20260103_noble:
-  image: registry.git.coop/webarch/containers/images/noble:20260103
-  stage: 20260103_noble
-  script:
-    - molecule test
-20260103_trixie:
-  image: registry.git.coop/webarch/containers/images/trixie:20260103
-  stage: 20260103_trixie
-  script:
-    - pre-commit install
-    - pre-commit run --all-files
-    - molecule test
+  # A recent version of the containers
+  - 20260405_bookworm
+  - 20260405_forky
+  - 20260405_noble
+  - 20260405_trixie
 20260129_bookworm:
   image: registry.git.coop/webarch/containers/images/bookworm:20260129
   stage: 20260129_bookworm
@@ -93,6 +69,30 @@ stages:
 20260129_trixie:
   image: registry.git.coop/webarch/containers/images/trixie:20260129
   stage: 20260129_trixie
+  script:
+    - pre-commit install
+    - pre-commit run --all-files
+    - molecule test
+20260405_bookworm:
+  image: registry.git.coop/webarch/containers/images/bookworm:20260405
+  stage: 20260405_bookworm
+  script:
+    - molecule test
+20260405_forky:
+  image: registry.git.coop/webarch/containers/images/forky:20260405
+  stage: 20260405_forky
+  script:
+    - pre-commit install
+    - pre-commit run --all-files
+    - molecule test
+20260405_noble:
+  image: registry.git.coop/webarch/containers/images/noble:20260405
+  stage: 20260405_noble
+  script:
+    - molecule test
+20260405_trixie:
+  image: registry.git.coop/webarch/containers/images/trixie:20260405
+  stage: 20260405_trixie
   script:
     - pre-commit install
     - pre-commit run --all-files
