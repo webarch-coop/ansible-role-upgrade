@@ -48,6 +48,7 @@ stages:
   - 20260405_bookworm
   - 20260405_forky
   - 20260405_noble
+  - 20260405_resolute
   - 20260405_trixie
 20260129_bookworm:
   image: registry.git.coop/webarch/containers/images/bookworm:20260129
@@ -89,6 +90,13 @@ stages:
   image: registry.git.coop/webarch/containers/images/noble:20260405
   stage: 20260405_noble
   script:
+    - molecule test
+20260405_resolute:
+  image: registry.git.coop/webarch/containers/images/resolute:20260405
+  stage: 20260405_resolute
+  script:
+    - pre-commit install
+    - pre-commit run --all-files
     - molecule test
 20260405_trixie:
   image: registry.git.coop/webarch/containers/images/trixie:20260405
