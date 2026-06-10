@@ -282,6 +282,14 @@
         - upgrade_init is defined
         - upgrade_init == "systemd"
 
+    - name: Include upgrade verify variables tasks
+      ansible.builtin.include_tasks: verify.yml
+      when:
+        - upgrade_verify is defined
+        - upgrade_verify | bool
+      tags:
+        - upgrade_verify
+
   when: upgrade | bool
   tags:
     - upgrade
