@@ -17,7 +17,7 @@
           - ansible_facts.effective_user_id == 0
         quiet: true
 
-    - name: JSON convert, jc, is required in the control node
+    - name: JSON convert, jc, is required on the control node
       ansible.builtin.command:
         cmd: which jc
       check_mode: false
