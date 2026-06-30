@@ -40,36 +40,36 @@ before_script:
 stages:
   # An older version of containers to test upgrades
   # https://git.coop/webarch/containers#docker-containers
-  - 20260424_bookworm
-  - 20260424_forky
-  - 20260424_noble
-  - 20260424_trixie
+  - 20260518_bookworm
+  - 20260518_forky
+  - 20260518_noble
+  - 20260518_trixie
   # A recent version of the containers
   - 20260604_bookworm
   - 20260604_forky
   - 20260604_noble
   - 20260604_resolute
   - 20260604_trixie
-20260424_bookworm:
-  image: registry.git.coop/webarch/containers/images/bookworm:20260424
-  stage: 20260424_bookworm
+20260518_bookworm:
+  image: registry.git.coop/webarch/containers/images/bookworm:20260518
+  stage: 20260518_bookworm
   script:
     - molecule test
-20260424_forky:
-  image: registry.git.coop/webarch/containers/images/forky:20260424
-  stage: 20260424_forky
+20260518_forky:
+  image: registry.git.coop/webarch/containers/images/forky:20260518
+  stage: 20260518_forky
   script:
     - pre-commit install
     - pre-commit run --all-files
     - molecule test
-20260424_noble:
-  image: registry.git.coop/webarch/containers/images/noble:20260424
-  stage: 20260424_noble
+20260518_noble:
+  image: registry.git.coop/webarch/containers/images/noble:20260518
+  stage: 20260518_noble
   script:
     - molecule test
-20260424_trixie:
-  image: registry.git.coop/webarch/containers/images/trixie:20260424
-  stage: 20260424_trixie
+20260518_trixie:
+  image: registry.git.coop/webarch/containers/images/trixie:20260518
+  stage: 20260518_trixie
   script:
     - pre-commit install
     - pre-commit run --all-files

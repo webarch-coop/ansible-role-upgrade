@@ -26,6 +26,13 @@
       changed_when: false
       register: upgrade_controller_which_jc
 
+    - name: Debug upgrade_controller_which_jc
+      ansible.builtin.debug:
+        var: upgrade_controller_which_jc
+        verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+      tags:
+        - debug
+
     - name: Get jc version on the control node
       ansible.builtin.command:
         cmd: jc -a
