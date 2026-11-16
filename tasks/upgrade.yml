@@ -26,6 +26,40 @@
         DEBIAN_FRONTEND: noninteractive
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
       register: upgrade_dist_upgrade
+      failed_when:
+        - upgrade_dist_upgrade.rc != 0
+        - (upgrade_dist_upgrade.rc != 100) and ("sudo dpkg --configure -a" not in upgrade_dist_upgrade.msg)
+
+    - name: Run dpkg --configure -a and dist-upgrade again
+      block:
+
+        - name: Run dpkg --configure -a
+          ansible.builtin.command:
+            cmd: dpkg --configure -a
+          changed_when: true
+          register: upgrade_dpkg_configure
+
+        - name: Debug the results of dpkg --configure -a
+          ansible.builtin.debug:
+            var: upgrade_dpkg_configure.stdout_lines
+            verbosity: "{% if ansible_check_mode | bool %}0{% else %}1{% endif %}"
+          when: upgrade_dpkg_configure.stdout_lines is defined
+
+        - name: Dist upgrade
+          ansible.builtin.apt:
+            cache_valid_time: 60
+            clean: true
+            dpkg_options: force-confdef,force-confold
+            update_cache: true
+            upgrade: dist
+          environment:
+            DEBIAN_FRONTEND: noninteractive
+            PATH: /usr/sbin:/usr/bin:/sbin:/bin
+          register: upgrade_dist_upgrade
+
+      when:
+        - upgrade_dist_upgrade.rc == 100
+        - ("sudo dpkg --configure -a" in upgrade_dist_upgrade.msg)
 
     - name: Debug the results of the dist upgrade
       ansible.builtin.debug:

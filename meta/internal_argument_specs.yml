@@ -78,6 +78,10 @@ argument_specs:
         type: dict
         required: false
         description: Result from running the apt module.
+      upgrade_dpkg_configure:
+        type: dict
+        required: false
+        description: Result from running the command module.
       upgrade_init:
         type: str
         required: false
