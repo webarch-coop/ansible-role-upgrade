@@ -27,8 +27,10 @@
         PATH: /usr/sbin:/usr/bin:/sbin:/bin
       register: upgrade_dist_upgrade
       failed_when:
-        - upgrade_dist_upgrade.rc != 0
-        - (upgrade_dist_upgrade.rc != 100) and ("sudo dpkg --configure -a" not in upgrade_dist_upgrade.msg)
+        - (upgrade_dist_upgrade.rc is ansible.builtin.defined) and (upgrade_dist_upgrade.rc != 0)
+        - >-
+          (upgrade_dist_upgrade.rc is ansible.builtin.defined) and
+          (upgrade_dist_upgrade.rc != 100) and ("sudo dpkg --configure -a" not in upgrade_dist_upgrade.msg)
 
     - name: Run dpkg --configure -a and dist-upgrade again
       block:
