@@ -22,6 +22,14 @@ argument_specs:
         type: str
         required: false
         description: Internal variable for the results of a lookup for the argument spec.
+      upgrade_chroot_apt_get_update:
+        type: dict
+        required: false
+        desciption: Internal variable for results form runing the ansible.builtin.command command module.
+      upgrade_chroot_packages_command:
+        type: dict
+        required: false
+        desciption: Internal variable for results form runing the ansible.builtin.command command module.
       upgrade_combined_argument_spec:
         type: dict
         required: false
